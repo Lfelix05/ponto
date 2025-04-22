@@ -3,6 +3,8 @@ import 'package:ponto/employee.dart';
 import 'database.dart';
 
 class AdminPanel extends StatefulWidget {
+  const AdminPanel({super.key});
+
   @override
   _AdminPanelState createState() => _AdminPanelState();
 }

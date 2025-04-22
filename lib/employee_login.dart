@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:ponto/cadastro_employee.dart';
 
 class EmployeeLogin extends StatefulWidget {
+  const EmployeeLogin({super.key});
+
   @override
   _EmployeeLoginState createState() => _EmployeeLoginState();
 }

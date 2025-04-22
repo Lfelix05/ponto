@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AdminCadastro extends StatefulWidget {
+  const AdminCadastro({super.key});
+
   @override
   _AdminCadastroState createState() => _AdminCadastroState();
 }

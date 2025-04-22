@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class EmployeeCadastro extends StatefulWidget {
+  const EmployeeCadastro({super.key});
+
   @override
   _EmployeeCadastroState createState() => _EmployeeCadastroState();
 }

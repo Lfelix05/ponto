@@ -3,6 +3,8 @@ import 'package:ponto/cadastro_admin.dart';
 import 'admin_panel.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
