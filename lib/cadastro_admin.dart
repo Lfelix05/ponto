@@ -1,44 +1,97 @@
 import 'package:flutter/material.dart';
+import 'adminstorage.dart';
+import 'login.dart';
+import 'admin_panel.dart';
+import 'admin.dart';
 
-class AdminCadastro extends StatefulWidget {
-  const AdminCadastro({super.key});
-
+class AdminRegisterScreen extends StatefulWidget {
   @override
-  _AdminCadastroState createState() => _AdminCadastroState();
+  _AdminRegisterScreenState createState() => _AdminRegisterScreenState();
 }
 
-class _AdminCadastroState extends State<AdminCadastro> {
-  final TextEditingController nomeController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  Future<void> _register() async {
+    if (_formKey.currentState!.validate()) {
+      if (_passwordController.text != _confirmPasswordController.text) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('As senhas não coincidem')));
+        return;
+      }
+
+      await AdminStorage.saveAdmin(
+        _nameController.text,
+        _phoneController.text,
+        _passwordController.text,
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Cadastro Admin')),
+      appBar: AppBar(title: Text('Cadastro de Administrador')),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: nomeController,
-              decoration: InputDecoration(labelText: 'Nome do Administrador'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: phoneController,
-              decoration: InputDecoration(labelText: 'Número de telefone'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: passwordController,
-              decoration: InputDecoration(labelText: 'Senha'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(onPressed: () {}, child: Text('Entrar')),
-          ],
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(labelText: 'Nome'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor, insira seu nome';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _phoneController,
+                decoration: InputDecoration(labelText: 'Telefone'),
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor, insira seu telefone';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _passwordController,
+                decoration: InputDecoration(labelText: 'Senha'),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor, insira uma senha';
+                  }
+                  if (value.length < 6) {
+                    return 'A senha deve ter pelo menos 6 caracteres';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _confirmPasswordController,
+                decoration: InputDecoration(labelText: 'Confirmar Senha'),
+                obscureText: true,
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(onPressed: _register, child: Text('Cadastrar')),
+            ],
+          ),
         ),
       ),
     );
