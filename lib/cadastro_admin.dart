@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'adminstorage.dart';
-import 'login.dart';
-import 'admin_panel.dart';
-import 'admin.dart';
+import 'admin_login.dart';
 
 class AdminRegisterScreen extends StatefulWidget {
+  const AdminRegisterScreen({super.key});
+
   @override
   _AdminRegisterScreenState createState() => _AdminRegisterScreenState();
 }

@@ -3,7 +3,7 @@ import 'package:ponto/employee.dart';
 import 'database.dart';
 import 'adminstorage.dart';
 import 'admin.dart';
-import 'login.dart';
+import 'admin_login.dart';
 
 class AdminPanel extends StatefulWidget {
   final Admin admin; 

@@ -4,6 +4,8 @@ import 'adminstorage.dart';
 import 'cadastro_admin.dart';
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
