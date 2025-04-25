@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ponto/home.dart';
+import 'package:ponto/view/home.dart';
 
 void main() {
   runApp(const MyApp());

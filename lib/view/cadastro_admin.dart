@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'adminstorage.dart';
+import '../adminstorage.dart';
 import 'admin_login.dart';
 
 class AdminRegisterScreen extends StatefulWidget {
