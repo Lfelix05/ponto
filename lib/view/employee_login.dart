@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ponto/view/cadastro_employee.dart';
+import 'package:ponto/view/employee_panel.dart';
+import '../database.dart';
 
 class EmployeeLogin extends StatefulWidget {
   const EmployeeLogin({super.key});
@@ -9,8 +10,41 @@ class EmployeeLogin extends StatefulWidget {
 }
 
 class _EmployeeLoginState extends State<EmployeeLogin> {
-  final TextEditingController idController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  void _loginEmployee(BuildContext context) async {
+    if (_formKey.currentState!.validate()) {
+      final name = nameController.text;
+      final phone = phoneController.text;
+
+      try {
+        // Verifica se o funcionário existe no banco de dados
+        final employee = await Database.getEmployees().then((employees) {
+          return employees.firstWhere(
+            (e) => e.name == name && e.phone == phone,
+            orElse: () {
+              throw Exception('Funcionário não encontrado');
+            },
+          );
+        });
+
+        // Redireciona para o painel do funcionário
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EmployeePanel(employee: employee),
+          ),
+        );
+      } catch (e) {
+        // Exibe mensagem de erro se o funcionário não for encontrado
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,37 +52,42 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
       appBar: AppBar(title: Text('Login Funcionário')),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: idController,
-              decoration: InputDecoration(labelText: 'ID do Funcionário'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: passwordController,
-              decoration: InputDecoration(labelText: 'Senha'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Lógica de login do funcionário
-                // Após login bem-sucedido, navegar para tela de marcação de ponto
-              },
-              child: Text('Entrar'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => EmployeeCadastro()),
-                );
-              },
-              child: Text('Não tem cadastro? Registre-se aqui'),
-            ),
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: InputDecoration(labelText: 'Nome do Funcionário'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor, insira o nome do funcionário';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: phoneController,
+                decoration: InputDecoration(labelText: 'Número de Telefone'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor, insira o número de telefone';
+                  }
+                  if (!RegExp(r'^\d+$').hasMatch(value)) {
+                    return 'Por favor, insira apenas números';
+                  }
+                  return null;
+                },
+                keyboardType: TextInputType.phone,
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => _loginEmployee(context),
+                child: Text('Entrar'),
+              ),
+            ],
+          ),
         ),
       ),
     );
