@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../database.dart';
 import '../ponto.dart';
 import 'package:intl/intl.dart';
+import 'package:geolocator/geolocator.dart';
 
 class EmployeePanel extends StatefulWidget {
   final Employee employee;
@@ -32,37 +33,76 @@ class _EmployeePanelState extends State<EmployeePanel> {
     }
   }
 
-  void _checkIn() {
-    final now = DateTime.now();
-    Database.addPonto(
-      widget.employee.id,
-      "Localização Padrão",
-      now.toIso8601String(),
+  Future<String> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Verifica se o serviço de localização está habilitado
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return "Serviço de localização desativado";
+    }
+
+    // Verifica as permissões de localização
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return "Permissão de localização negada";
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return "Permissão de localização permanentemente negada";
+    }
+
+    // Obtém a localização atual
+    final position = await Geolocator.getCurrentPosition(
+      // ignore: deprecated_member_use
+      desiredAccuracy: LocationAccuracy.high,
     );
+
+    return "${position.latitude}, ${position.longitude}";
+  }
+
+  void _checkIn() async {
+    final now = DateTime.now();
+    final location = await _getCurrentLocation();
+
+    Database.addPonto(widget.employee.id, location, now.toIso8601String());
+
     setState(() {
       _currentPonto = Ponto(
         id: widget.employee.id,
         name: widget.employee.name,
-        location: "Localização Padrão",
+        location: location,
         checkIn: now,
       );
       _hasCheckedIn = true;
     });
+
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('Check-in realizado com sucesso!')));
   }
 
-  void _checkOut() {
+  void _checkOut() async {
     final now = DateTime.now();
+    final location = await _getCurrentLocation();
+
     if (_currentPonto != null) {
       Database.updateCheckOut(widget.employee.id, now.toIso8601String());
       setState(() {
         _currentPonto!.checkOut = now;
         _hasCheckedIn = false;
       });
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Check-out realizado com sucesso!')),
+        SnackBar(
+          content: Text(
+            'Check-out realizado com sucesso! Localização: $location',
+          ),
+        ),
       );
     }
   }
@@ -99,6 +139,7 @@ class _EmployeePanelState extends State<EmployeePanel> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text('Painel do Funcionário'),
         actions: [
           IconButton(

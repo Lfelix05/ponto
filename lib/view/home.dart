@@ -14,7 +14,7 @@ class HomePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/logo.png', // Adicione uma imagem de logo no seu projeto
+              'assets/logo.png', // Adicionar uma imagem de logo
               height: 150,
             ),
             SizedBox(height: 50),
@@ -44,7 +44,7 @@ class HomePage extends StatelessWidget {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Navegar para tela de login do admin existente
+                // Navegar para tela de login do admin
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => LoginScreen()),

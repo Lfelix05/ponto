@@ -6,6 +6,7 @@ import '../admin.dart';
 import 'admin_login.dart';
 import '/ponto.dart';
 import 'package:intl/intl.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class AdminPanel extends StatefulWidget {
   final Admin admin;
@@ -18,13 +19,13 @@ class AdminPanel extends StatefulWidget {
 class _AdminPanelState extends State<AdminPanel> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-
+  //calcula as horas trabalhadas no mês
   double calcularHorasTrabalhadasPorMes(List<Ponto> pontos) {
     final now = DateTime.now();
     final pontosDoMes = pontos.where(
       (p) => p.checkIn.month == now.month && p.checkIn.year == now.year,
     );
-
+    //soma as horas trabalhadas
     return pontosDoMes.fold(0.0, (total, ponto) {
       if (ponto.checkOut != null) {
         final duracao = ponto.checkOut!.difference(ponto.checkIn).inHours;
@@ -112,12 +113,14 @@ class _AdminPanelState extends State<AdminPanel> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text("Painel Administrativo"),
         actions: [
           IconButton(
             icon: Icon(Icons.add_circle_outline),
             onPressed: _showCadastroFuncionarioDialog,
           ),
+          // Botão para exibir informações do admin
           IconButton(
             icon: Icon(Icons.person),
             onPressed: () {
@@ -199,7 +202,7 @@ class _AdminPanelState extends State<AdminPanel> {
 
                   return ListTile(
                     title: Text(
-                      "${employee.name} - ${pontos.isNotEmpty ? pontos.last.location : 'Localização desconhecida'}",
+                      "${employee.name} (${employee.phone})",
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,35 +216,104 @@ class _AdminPanelState extends State<AdminPanel> {
                         Text("Horas trabalhadas no mês: $horasTrabalhadas"),
                       ],
                     ),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: Text("Excluir Funcionário"),
-                              content: Text(
-                                "Você tem certeza que deseja excluir ${employee.name}?",
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text("Cancelar"),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.map, color: Colors.blue),
+                          onPressed: () {
+                            if (pontos.isNotEmpty) {
+                              final location = pontos.last.location;
+                              final latLng =
+                                  location
+                                      .split(',')
+                                      .map((e) => double.parse(e.trim()))
+                                      .toList();
+
+                              //exibe o Google Map com a localização do funcionário
+                              showDialog(
+                                context: context,
+                                builder:
+                                    (context) => AlertDialog(
+                                      title: Text("Localização do Funcionário"),
+                                      content: Container(
+                                        width: double.maxFinite,
+                                        height: 300,
+                                        child: GoogleMap(
+                                          initialCameraPosition: CameraPosition(
+                                            target: LatLng(
+                                              latLng[0],
+                                              latLng[1],
+                                            ),
+                                            zoom: 15,
+                                          ),
+                                          markers: {
+                                            Marker(
+                                              markerId: MarkerId(
+                                                "employee_location",
+                                              ),
+                                              position: LatLng(
+                                                latLng[0],
+                                                latLng[1],
+                                              ),
+                                              infoWindow: InfoWindow(
+                                                title:
+                                                    "Localização do Funcionário",
+                                              ),
+                                            ),
+                                          },
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed:
+                                              () => Navigator.pop(context),
+                                          child: Text("Fechar"),
+                                        ),
+                                      ],
+                                    ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Localização não disponível"),
                                 ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    Database.deleteEmployee(employee.id);
-                                    setState(() {});
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text("Excluir"),
-                                ),
-                              ],
+                              );
+                            }
+                          },
+                        ),
+                        // Botão para excluir o funcionário
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text("Excluir Funcionário"),
+                                  content: Text(
+                                    "Você tem certeza que deseja excluir ${employee.name}?",
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: Text("Cancelar"),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Database.deleteEmployee(employee.id);
+                                        setState(() {});
+                                        Navigator.pop(context);
+                                      },
+                                      child: Text("Excluir"),
+                                    ),
+                                  ],
+                                );
+                              },
                             );
                           },
-                        );
-                      },
+                        ),
+                      ],
                     ),
                   );
                 },
