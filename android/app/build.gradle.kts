@@ -3,7 +3,6 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services") version "4.4.2" apply false
 }
 
 android {
@@ -22,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.projeto.ponto"
+        applicationId = "com.example.ponto"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -38,10 +37,8 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
-    
 }
 
 flutter {
     source = "../.."
 }
-apply plugin: 'com.google.gms.google-services'
