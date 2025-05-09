@@ -1,7 +1,7 @@
 # Ponto
 
 Ponto Eletrônico é um aplicativo desenvolvido em Flutter para gerenciar o registro de ponto de funcionários de forma prática e eficiente. Ele oferece funcionalidades tanto para administradores quanto para funcionários, permitindo o controle de horários de trabalho, localização e gerenciamento de dados diretamente pelo aplicativo.
----
+
 ## Funcionalidades Principais
 ### Para Funcionários
 ```dart
@@ -38,12 +38,16 @@ Ponto Eletrônico é um aplicativo desenvolvido em Flutter para gerenciar o regi
 ---
 ### Como Usar
 **Funcionário:**
-1.Faça login com seu nome e telefone.
-2.Registre seu ponto (check-in e check-out) e acompanhe suas horas trabalhadas.
+<ol>
+  <li>Faça login com seu nome e telefone.</li>
+  <li>Registre seu ponto (check-in e check-out) e acompanhe suas horas trabalhadas.</li>
+</ol>
 
 **Administrador:**
-1.Faça login ou cadastre-se como administrador.
-2.Gerencie os funcionários, visualize registros de ponto e acompanhe a localização em tempo real.
+<ol>
+  <li>Faça login ou cadastre-se como administrador.</li>
+  <li>Gerencie os funcionários, visualize registros de ponto e acompanhe a localização em tempo real.</li>
+</ol>
 
 ## Público-Alvo
 Este aplicativo é ideal para pequenas e médias empresas que desejam gerenciar o registro de ponto de seus funcionários de forma digital, prática e eficiente.
