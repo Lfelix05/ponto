@@ -1,53 +1,53 @@
 # Ponto
 
-Ponto Eletrônico é um aplicativo desenvolvido em Flutter para gerenciar o registro de ponto de funcionários de forma prática e eficiente. Ele oferece funcionalidades tanto para administradores quanto para funcionários, permitindo o controle de horários de trabalho, localização e gerenciamento de dados diretamente pelo aplicativo.
+Ponto Eletrônico is a Flutter-based app designed to efficiently manage employee time tracking. It provides features for both administrators and employees, allowing control over work hours, location, and data management directly through the app.
 
-## Funcionalidades Principais
-### Para Funcionários
+## Main Features
+### For Employees
 ```dart
--Login Seguro:               Acesso ao painel do funcionário com validação de dados.
--Registro de Ponto:          Realize check-in e check-out com registro automático da localização.
--Visualização de Horários:   Exibe o horário de check-in, check-out e as horas trabalhadas no dia e no mês.
--Interface Intuitiva:        Painel simplificado para facilitar o uso diário.
+-Secure Login:               Access the employee dashboard with data validation.
+-Time Clocking:              Check-in and check-out with automatic location recording.
+-Hours Overview:             Displays check-in and check-out times, as well as hours worked daily and monthly.
+-Intuitive Interface:        Simplified dashboard for everyday use.
 ```
 
-### Para Administradores
+### For Administrators
 ```dart
--Cadastro de Funcionários:       Adicione novos funcionários ao sistema com nome e telefone.
--Gerenciamento de Funcionários:  Visualize a lista de funcionários cadastrados e seus registros de ponto.
--Exibição de Localização:        Veja a localização do funcionário no momento do registro de ponto em um mapa interativo.
--Controle de Horas Trabalhadas:  Monitore as horas trabalhadas por mês de cada funcionário.
--Logout Seguro:                  Logout como único meio de retorno ao menu principal.
+-Employee Registration:       Add new employees to the system with name and phone number.
+-Employee Management:         View the list of registered employees and their time records.
+-Location Display:            View the employee's location at the time of clock-in on an interactive map.
+-Work Hours Monitoring:       Track monthly worked hours of each employee.
+-Secure Logout:               Logout as the only way to return to the main menu.
 ```
 
-### Funcionalidades Gerais
+### General Features
 ```dart
--Integração com Firebase:    Gerenciamento de dados em tempo real usando o Firebase Firestore.
--Geolocalização:             Registro da localização do funcionário no momento do check-in e check-out.
--Google Maps:                Exibição de localização em mapas interativos.
--Design Responsivo:          Interface adaptada para diferentes tamanhos de tela.
+-Firebase Integration:        Real-time data management using Firebase Firestore.
+-Geolocation:                 Records employee location at check-in and check-out.
+-Google Maps:                 Displays locations using interactive maps.
+-Responsive Design:           Interface adapts to different screen sizes.
 ```
-## Tecnologias Utilizadas
+## Technologies Used
 ```dart
-->Flutter:              Framework para desenvolvimento multiplataforma.
-->Firebase:             Gerenciamento de autenticação e banco de dados em tempo real.
-->Google Maps API:      Exibição de mapas e localização.
-->Geolocator:           Captura de localização do dispositivo.
-->Shared Preferences:   Armazenamento local de dados do administrador.
+->Flutter:                    Cross-platform development framework.
+->Firebase:                   Real-time database and authentication management.
+->Google Maps API:            Map and location display.
+->Geolocator:                 Device location tracking.
+->Shared Preferences:         Local data storage for administrator info.
 ```
 ---
-### Como Usar
-**Funcionário:**
-<ol>
-  <li>Faça login com seu nome e telefone.</li>
-  <li>Registre seu ponto (check-in e check-out) e acompanhe suas horas trabalhadas.</li>
+### How to Use
+**Employee:**
+<ol> 
+  <li>Log in using your name and phone number.</li> 
+  <li>Register your check-in and check-out, and track your worked hours.</li> 
 </ol>
 
-**Administrador:**
-<ol>
-  <li>Faça login ou cadastre-se como administrador.</li>
-  <li>Gerencie os funcionários, visualize registros de ponto e acompanhe a localização em tempo real.</li>
+**Administrator:**
+<ol> 
+  <li>Log in or register as an administrator.</li> 
+  <li>Manage employees, view time records, and track real-time location.</li> 
 </ol>
 
-## Público-Alvo
-Este aplicativo é ideal para pequenas e médias empresas que desejam gerenciar o registro de ponto de seus funcionários de forma digital, prática e eficiente.
+## Target Audience
+This app is ideal for small and medium-sized businesses that want to manage employee time tracking in a digital, practical, and efficient way.
