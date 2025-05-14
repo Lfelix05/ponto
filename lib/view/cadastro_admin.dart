@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../adminstorage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../admin.dart';
 import 'admin_login.dart';
 
 class AdminRegisterScreen extends StatefulWidget {
@@ -25,16 +27,42 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
         return;
       }
 
-      await AdminStorage.saveAdmin(
-        _nameController.text,
-        _phoneController.text,
-        _passwordController.text,
-      );
+      try {
+        // Cria o usuário no Firebase Authentication
+        final userCredential = await FirebaseAuth.instance
+            .createUserWithEmailAndPassword(
+              email:
+                  "${_phoneController.text}@admin.com", // Usa o telefone como parte do e-mail
+              password: _passwordController.text,
+            );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
+        // Salva os dados no Firestore
+        final admin = Admin(
+          id: userCredential.user!.uid,
+          name: _nameController.text,
+          phone: _phoneController.text,
+          password: _passwordController.text,
+        );
+
+        await FirebaseFirestore.instance
+            .collection('admins')
+            .doc(admin.id)
+            .set(admin.toJson());
+
+        // Redireciona para a tela de login após o registro
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Administrador cadastrado com sucesso!')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao cadastrar administrador: $e')),
+        );
+      }
     }
   }
 
@@ -90,7 +118,17 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
               ),
               SizedBox(height: 20),
               ElevatedButton(onPressed: _register, child: Text('Cadastrar')),
-            ],
+            
+              TextButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                  );
+                },
+                child: Text('Já tem uma conta? Faça login!')),
+              
+                ],
           ),
         ),
       ),
