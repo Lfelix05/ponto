@@ -4,13 +4,13 @@ import 'package:crypto/crypto.dart';  //para criptografar a senha
 class Admin {
   final String id;
   final String name;
-  final String phone;
+  final String email;
   final String password;
 
   Admin({
     required this.id,
     required this.name,
-    required this.phone,
+    required this.email,
     required this.password,
   });
 
@@ -23,7 +23,7 @@ class Admin {
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
-    'phone': phone,
+    'email': email,
     'password': hashedPassword,         // Salva o hash da senha
   };
 
@@ -32,7 +32,7 @@ class Admin {
     return Admin(
       id: json['id'],
       name: json['name'],
-      phone: json['phone'],
+      email: json['email'],
       password: json['password'],       // O hash será usado como senha
     );
   }

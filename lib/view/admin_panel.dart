@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ponto/employee.dart';
 import '../database.dart';
-import '../adminstorage.dart';
 import '../admin.dart';
 import 'admin_login.dart';
 import '/ponto.dart';
@@ -36,7 +35,7 @@ class _AdminPanelState extends State<AdminPanel> {
   }
 
   void _showCadastroFuncionarioDialog() {
-    final _phoneController = TextEditingController();
+    final _emailController = TextEditingController();
 
     showDialog(
       context: context,
@@ -61,11 +60,11 @@ class _AdminPanelState extends State<AdminPanel> {
                     },
                   ),
                   TextFormField(
-                    controller: _phoneController,
+                    controller: _emailController,
                     decoration: InputDecoration(
                       labelText: "Número de Telefone",
                     ),
-                    keyboardType: TextInputType.phone,
+                    keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Por favor, insira o número de telefone";
@@ -90,12 +89,12 @@ class _AdminPanelState extends State<AdminPanel> {
                     // Adiciona o funcionário ao banco de dados
                     Database.addEmployee(
                       _nameController.text,
-                      _phoneController.text,
+                      _emailController.text,
                     );
 
                     // Limpa os campos do formulário
                     _nameController.clear();
-                    _phoneController.clear();
+                    _emailController.clear();
 
                     // Atualiza a interface
                     setState(() {});
@@ -135,7 +134,7 @@ class _AdminPanelState extends State<AdminPanel> {
                         children: [
                           Text("Nome: ${widget.admin.name}"),
                           Text("ID: ${widget.admin.id}"),
-                          Text("Telefone: ${widget.admin.phone}"),
+                          Text("Telefone: ${widget.admin.email}"),
                         ],
                       ),
                       actions: [
@@ -151,7 +150,7 @@ class _AdminPanelState extends State<AdminPanel> {
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () async {
-              await AdminStorage.clearAdmin();
+              // Faz logout do Firebase Auth
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => LoginScreen()),

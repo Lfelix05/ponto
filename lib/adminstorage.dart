@@ -9,12 +9,12 @@ class AdminStorage {
     return DateTime.now().millisecondsSinceEpoch.toString();
   }
 
-  static Future<void> saveAdmin(String name, String phone, String password) async {
+  static Future<void> saveAdmin(String name, String email, String password) async {
     final id = await _generateId();
     final admin = Admin(
       id: id,
       name: name,
-      phone: phone,
+      email: email,
       password: password,
     );
     final prefs = await SharedPreferences.getInstance();
@@ -30,7 +30,7 @@ class AdminStorage {
     return Admin(
       id: decoded['id'],
       name: decoded['name'],
-      phone: decoded['phone'],
+      email: decoded['email'],
       password: decoded['password'],
     );
   }

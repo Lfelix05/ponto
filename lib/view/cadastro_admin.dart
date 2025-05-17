@@ -14,7 +14,7 @@ class AdminRegisterScreen extends StatefulWidget {
 class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
@@ -31,8 +31,7 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
         // Cria o usuário no Firebase Authentication
         final userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(
-              email:
-                  "${_phoneController.text}@admin.com", // Usa o telefone como parte do e-mail
+              email: _emailController.text,
               password: _passwordController.text,
             );
 
@@ -40,7 +39,7 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
         final admin = Admin(
           id: userCredential.user!.uid,
           name: _nameController.text,
-          phone: _phoneController.text,
+          email: _emailController.text,
           password: _passwordController.text,
         );
 
@@ -87,12 +86,12 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
                 },
               ),
               TextFormField(
-                controller: _phoneController,
-                decoration: InputDecoration(labelText: 'Telefone'),
-                keyboardType: TextInputType.phone,
+                controller: _emailController,
+                decoration: InputDecoration(labelText: 'Email'),
+                keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor, insira seu telefone';
+                    return 'Por favor, insira seu email';
                   }
                   return null;
                 },
