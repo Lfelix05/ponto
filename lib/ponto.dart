@@ -13,7 +13,6 @@ class Ponto {
     this.checkOut,
   });
 
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -28,9 +27,10 @@ class Ponto {
     return Ponto(
       id: json['id'],
       name: json['name'],
-      location: json['location'],
+      location: (json['location'] ?? '').toString(),
       checkIn: DateTime.parse(json['checkIn']),
-      checkOut: json['checkOut'] != null ? DateTime.parse(json['checkOut']) : null,
+      checkOut:
+          json['checkOut'] != null ? DateTime.parse(json['checkOut']) : null,
     );
   }
 }

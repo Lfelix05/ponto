@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:ponto/employee.dart';
 import '../database.dart';
@@ -35,73 +36,60 @@ class _AdminPanelState extends State<AdminPanel> {
   }
 
   void _showCadastroFuncionarioDialog() {
-    final _emailController = TextEditingController();
-
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text("Cadastrar Funcionário"),
-            content: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                      labelText: "Nome do Funcionário",
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Por favor, insira o nome do funcionário";
-                      }
-                      return null;
+            title: Text("Adicionar Funcionário"),
+            content: SizedBox(
+              width: 300,
+              height: 400,
+              child: StreamBuilder<QuerySnapshot>(
+                stream:
+                    FirebaseFirestore.instance
+                        .collection('employees')
+                        .where(
+                          'selected',
+                          isEqualTo: false,
+                        ) // só não selecionados
+                        .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData)
+                    return Center(child: CircularProgressIndicator());
+                  final docs = snapshot.data!.docs;
+                  if (docs.isEmpty) {
+                    return Center(child: Text("Nenhum funcionário disponível"));
+                  }
+                  return ListView.builder(
+                    itemCount: docs.length,
+                    itemBuilder: (context, index) {
+                      final data = docs[index].data() as Map<String, dynamic>;
+                      return ListTile(
+                        title: Text(data['name'] ?? ''),
+                        subtitle: Text(data['email'] ?? ''),
+                        trailing: ElevatedButton(
+                          child: Text("Adicionar"),
+                          onPressed: () async {
+                            await FirebaseFirestore.instance
+                                .collection('employees')
+                                .doc(docs[index].id)
+                                .update({'selected': true});
+                            Navigator.pop(
+                              context,
+                            ); // Fecha o pop-up após adicionar
+                            setState(() {}); // Atualiza a tela principal
+                          },
+                        ),
+                      );
                     },
-                  ),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: "Número de Telefone",
-                    ),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Por favor, insira o número de telefone";
-                      }
-                      if (!RegExp(r'^\d+$').hasMatch(value)) {
-                        return "Por favor, insira apenas números";
-                      }
-                      return null;
-                    },
-                  ),
-                ],
+                  );
+                },
               ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text("Cancelar"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    // Adiciona o funcionário ao banco de dados
-                    Database.addEmployee(
-                      _nameController.text,
-                      _emailController.text,
-                    );
-
-                    // Limpa os campos do formulário
-                    _nameController.clear();
-                    _emailController.clear();
-
-                    // Atualiza a interface
-                    setState(() {});
-                    Navigator.pop(context);
-                  }
-                },
-                child: Text("Cadastrar"),
+                child: Text("Fechar"),
               ),
             ],
           ),
@@ -177,8 +165,14 @@ class _AdminPanelState extends State<AdminPanel> {
             itemBuilder: (context, index) {
               final employee = snapshot.data![index];
 
-              return FutureBuilder<List<Ponto>>(
-                future: Database.getPontosByEmployeeId(employee.id),
+              return StreamBuilder<QuerySnapshot>(
+                stream:
+                    FirebaseFirestore.instance
+                        .collection('employees')
+                        .doc(employee.id)
+                        .collection('pontos')
+                        .orderBy('checkIn', descending: false)
+                        .snapshots(),
                 builder: (context, pontosSnapshot) {
                   if (pontosSnapshot.connectionState ==
                       ConnectionState.waiting) {
@@ -194,15 +188,20 @@ class _AdminPanelState extends State<AdminPanel> {
                     );
                   }
 
-                  final pontos = pontosSnapshot.data!;
+                  final pontos =
+                      pontosSnapshot.data!.docs
+                          .map(
+                            (doc) => Ponto.fromJson(
+                              doc.data() as Map<String, dynamic>,
+                            ),
+                          )
+                          .toList();
                   final horasTrabalhadas = calcularHorasTrabalhadasPorMes(
                     pontos,
                   );
 
                   return ListTile(
-                    title: Text(
-                      "${employee.name} (${employee.phone})",
-                    ),
+                    title: Text("${employee.name} (${employee.email})"),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -221,57 +220,91 @@ class _AdminPanelState extends State<AdminPanel> {
                         IconButton(
                           icon: Icon(Icons.map, color: Colors.blue),
                           onPressed: () {
-                            if (pontos.isNotEmpty) {
-                              final location = pontos.last.location;
-                              final latLng =
-                                  location
-                                      .split(',')
-                                      .map((e) => double.parse(e.trim()))
-                                      .toList();
+                            if (pontos.isNotEmpty &&
+                                pontos.last.location != null &&
+                                pontos.last.location is String &&
+                                pontos.last.location
+                                    .toString()
+                                    .trim()
+                                    .isNotEmpty &&
+                                pontos.last.location.toString().contains(',')) {
+                              try {
+                                final location =
+                                    pontos.last.location.toString();
+                                final latLng =
+                                    location
+                                        .split(',')
+                                        .map(
+                                          (e) =>
+                                              double.tryParse(e.trim()) ?? 0.0,
+                                        )
+                                        .toList();
 
-                              //exibe o Google Map com a localização do funcionário
-                              showDialog(
-                                context: context,
-                                builder:
-                                    (context) => AlertDialog(
-                                      title: Text("Localização do Funcionário"),
-                                      content: Container(
-                                        width: double.maxFinite,
-                                        height: 300,
-                                        child: GoogleMap(
-                                          initialCameraPosition: CameraPosition(
-                                            target: LatLng(
-                                              latLng[0],
-                                              latLng[1],
-                                            ),
-                                            zoom: 15,
+                                if (latLng.length == 2 &&
+                                    latLng[0] != 0.0 &&
+                                    latLng[1] != 0.0) {
+                                  //exibe o Google Map com a localização do funcionário
+                                  showDialog(
+                                    context: context,
+                                    builder:
+                                        (context) => AlertDialog(
+                                          title: Text(
+                                            "Localização do Funcionário",
                                           ),
-                                          markers: {
-                                            Marker(
-                                              markerId: MarkerId(
-                                                "employee_location",
-                                              ),
-                                              position: LatLng(
-                                                latLng[0],
-                                                latLng[1],
-                                              ),
-                                              infoWindow: InfoWindow(
-                                                title:
-                                                    "Localização do Funcionário",
-                                              ),
+                                          content: Container(
+                                            width: double.maxFinite,
+                                            height: 300,
+                                            child: GoogleMap(
+                                              initialCameraPosition:
+                                                  CameraPosition(
+                                                    target: LatLng(
+                                                      latLng[0],
+                                                      latLng[1],
+                                                    ),
+                                                    zoom: 15,
+                                                  ),
+                                              markers: {
+                                                Marker(
+                                                  markerId: MarkerId(
+                                                    "employee_location",
+                                                  ),
+                                                  position: LatLng(
+                                                    latLng[0],
+                                                    latLng[1],
+                                                  ),
+                                                  infoWindow: InfoWindow(
+                                                    title:
+                                                        "Localização do Funcionário",
+                                                  ),
+                                                ),
+                                              },
                                             ),
-                                          },
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              onPressed:
+                                                  () => Navigator.pop(context),
+                                              child: Text("Fechar"),
+                                            ),
+                                          ],
                                         ),
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed:
-                                              () => Navigator.pop(context),
-                                          child: Text("Fechar"),
-                                        ),
-                                      ],
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("Localização inválida"),
                                     ),
-                              );
+                                  );
+                                }
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      "Erro ao processar localização",
+                                    ),
+                                  ),
+                                );
+                              }
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(

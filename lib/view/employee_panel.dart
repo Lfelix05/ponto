@@ -4,6 +4,7 @@ import '../database.dart';
 import '../ponto.dart';
 import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EmployeePanel extends StatefulWidget {
   final Employee employee;
@@ -69,7 +70,18 @@ class _EmployeePanelState extends State<EmployeePanel> {
     final now = DateTime.now();
     final location = await _getCurrentLocation();
 
-    Database.addPonto(widget.employee.id, location, now.toIso8601String());
+    // Salva no Firestore
+    await FirebaseFirestore.instance
+        .collection('employees')
+        .doc(widget.employee.id)
+        .collection('pontos')
+        .add({
+          'id': widget.employee.id,
+          'name': widget.employee.name,
+          'location': location ?? '', // <-- aqui: nunca salve null! JAMAIS!
+          'checkIn': now.toIso8601String(),
+          'checkOut': null,
+        });
 
     setState(() {
       _currentPonto = Ponto(
@@ -91,7 +103,26 @@ class _EmployeePanelState extends State<EmployeePanel> {
     final location = await _getCurrentLocation();
 
     if (_currentPonto != null) {
-      Database.updateCheckOut(widget.employee.id, now.toIso8601String());
+      // Busca o último ponto aberto (sem checkOut)
+      final pontosRef = FirebaseFirestore.instance
+          .collection('employees')
+          .doc(widget.employee.id)
+          .collection('pontos');
+      final snapshot =
+          await pontosRef
+              .where('checkOut', isEqualTo: null)
+              .orderBy('checkIn', descending: true)
+              .limit(1)
+              .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final docId = snapshot.docs.first.id;
+        await pontosRef.doc(docId).update({
+          'checkOut': now.toIso8601String(),
+          'locationCheckOut': location,
+        });
+      }
+
       setState(() {
         _currentPonto!.checkOut = now;
         _hasCheckedIn = false;
@@ -156,7 +187,7 @@ class _EmployeePanelState extends State<EmployeePanel> {
                         children: [
                           Text("Nome: ${widget.employee.name}"),
                           Text("ID: ${widget.employee.id}"),
-                          Text("Telefone: ${widget.employee.phone}"),
+                          Text("Email: ${widget.employee.email}"),
                         ],
                       ),
                       actions: [

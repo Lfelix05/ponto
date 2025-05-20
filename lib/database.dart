@@ -1,5 +1,6 @@
 import 'employee.dart';
 import 'ponto.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Database {
   // Lista de funcionários
@@ -10,15 +11,23 @@ class Database {
 
   // Retorna a lista de funcionários
   static Future<List<Employee>> getEmployees() async {
-    return employees;
+    final snapshot =
+        await FirebaseFirestore.instance
+            .collection('employees')
+            .where('selected', isEqualTo: true)
+            .get();
+
+    return snapshot.docs.map((doc) => Employee.fromJson(doc.data())).toList();
   }
 
   // Adiciona um novo funcionário
-  static void addEmployee(String name, String phone) {
+  static void addEmployee(String name, String password) {
     final employee = Employee(
       id: DateTime.now().toString(), // Gera um ID único para o funcionário
       name: name,
-      phone: phone,
+      email: '',
+      password: password,
+      selected: false,
     );
     employees.add(employee); // Adiciona o funcionário à lista de funcionários
   }
@@ -53,10 +62,16 @@ class Database {
 
   // Retorna os registros de ponto de um funcionário específico
   static Future<List<Ponto>> getPontosByEmployeeId(String employeeId) async {
-    // Simula um atraso para representar uma consulta ao banco de dados
-    await Future.delayed(Duration(milliseconds: 500));
+    final snapshot =
+        await FirebaseFirestore.instance
+            .collection('employees')
+            .doc(employeeId)
+            .collection('pontos')
+            .orderBy('checkIn', descending: false)
+            .get();
 
-    // Filtra os registros de ponto pelo ID do funcionário
-    return pontos.where((ponto) => ponto.id == employeeId).toList();
+    return snapshot.docs
+        .map((doc) => Ponto.fromJson(doc.data()))
+        .toList();
   }
 }
