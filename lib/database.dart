@@ -1,7 +1,6 @@
 import 'employee.dart';
 import 'ponto.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geolocator/geolocator.dart';
 
 class Database {
   // Lista de funcionários
@@ -45,51 +44,14 @@ class Database {
     );
   }
 
-  // Atualiza o horário de saída (checkOut) de um registro de ponto e salva localização
-  static Future<void> updateCheckOut(String employeeId, String checkOut) async {
-    // Obtém a localização atual
-    Position? position;
-    try {
-      LocationPermission permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        position = null;
-      } else {
-        position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high,
-        );
-      }
-    } catch (e) {
-      position = null;
-    }
-
+  // Atualiza o horário de saída (checkOut) de um registro de ponto
+  static void updateCheckOut(String employeeId, String checkOut) {
     for (var ponto in pontos) {
       if (ponto.id == employeeId && ponto.checkOut == null) {
         ponto.checkOut = DateTime.parse(checkOut);
-        if (position != null) {
-          ponto.location = '${position.latitude},${position.longitude}';
-        }
         break;
       }
     }
-
-    // Se você também salva no Firestore, atualize lá:
-    await FirebaseFirestore.instance
-        .collection('employees')
-        .doc(employeeId)
-        .collection('pontos')
-        .where('checkOut', isNull: true)
-        .limit(1)
-        .get()
-        .then((snapshot) {
-          if (snapshot.docs.isNotEmpty) {
-            snapshot.docs.first.reference.update({
-              'checkOut': DateTime.parse(checkOut),
-              if (position != null)
-                'location': '${position.latitude},${position.longitude}',
-            });
-          }
-        });
   }
 
   // Remove um funcionário e seus registros de ponto
@@ -108,6 +70,8 @@ class Database {
             .orderBy('checkIn', descending: false)
             .get();
 
-    return snapshot.docs.map((doc) => Ponto.fromJson(doc.data())).toList();
+    return snapshot.docs
+        .map((doc) => Ponto.fromJson(doc.data()))
+        .toList();
   }
 }

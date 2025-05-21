@@ -1,7 +1,7 @@
 class Ponto {
   final String id;
   final String name;
-  String location;
+  final String location;
   final DateTime checkIn;
   DateTime? checkOut;
 
