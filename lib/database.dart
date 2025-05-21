@@ -44,13 +44,31 @@ class Database {
     );
   }
 
-  // Atualiza o horário de saída (checkOut) de um registro de ponto
-  static void updateCheckOut(String employeeId, String checkOut) {
-    for (var ponto in pontos) {
-      if (ponto.id == employeeId && ponto.checkOut == null) {
-        ponto.checkOut = DateTime.parse(checkOut);
-        break;
-      }
+  // Atualiza o horário de saída (checkOut) no Firestore
+  static Future<void> updateCheckOut(
+    String employeeId,
+    String checkOut,
+    String locationCheckOut,
+  ) async {
+    // Busca o último ponto aberto (sem checkOut)
+    final pontosRef = FirebaseFirestore.instance
+        .collection('employees')
+        .doc(employeeId)
+        .collection('pontos');
+    final snapshot =
+        await pontosRef
+            .where('checkOut', isEqualTo: null)
+            .orderBy('checkIn', descending: true)
+            .limit(1)
+            .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      final docId = snapshot.docs.first.id;
+      await pontosRef.doc(docId).update({
+        'checkOut': checkOut,
+        'locationCheckOut':
+            locationCheckOut, // salva a localização do check-out
+      });
     }
   }
 
@@ -70,8 +88,6 @@ class Database {
             .orderBy('checkIn', descending: false)
             .get();
 
-    return snapshot.docs
-        .map((doc) => Ponto.fromJson(doc.data()))
-        .toList();
+    return snapshot.docs.map((doc) => Ponto.fromJson(doc.data())).toList();
   }
 }

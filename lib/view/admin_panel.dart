@@ -17,8 +17,6 @@ class AdminPanel extends StatefulWidget {
 }
 
 class _AdminPanelState extends State<AdminPanel> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
   //calcula as horas trabalhadas no mês
   double calcularHorasTrabalhadasPorMes(List<Ponto> pontos) {
     final now = DateTime.now();
@@ -221,8 +219,6 @@ class _AdminPanelState extends State<AdminPanel> {
                           icon: Icon(Icons.map, color: Colors.blue),
                           onPressed: () {
                             if (pontos.isNotEmpty &&
-                                pontos.last.location != null &&
-                                pontos.last.location is String &&
                                 pontos.last.location
                                     .toString()
                                     .trim()

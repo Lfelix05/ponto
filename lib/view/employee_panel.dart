@@ -78,7 +78,7 @@ class _EmployeePanelState extends State<EmployeePanel> {
         .add({
           'id': widget.employee.id,
           'name': widget.employee.name,
-          'location': location ?? '', // <-- aqui: nunca salve null! JAMAIS!
+          'location': location, // <-- aqui: nunca salve null! JAMAIS!
           'checkIn': now.toIso8601String(),
           'checkOut': null,
         });
