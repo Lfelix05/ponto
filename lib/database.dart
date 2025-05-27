@@ -17,7 +17,9 @@ class Database {
             .where('selected', isEqualTo: true)
             .get();
 
-    return snapshot.docs.map((doc) => Employee.fromJson(doc.data())).toList();
+    return snapshot.docs
+        .map((doc) => Employee.fromJson(doc.data()))
+        .toList();
   }
 
   // Adiciona um novo funcionário
@@ -25,7 +27,7 @@ class Database {
     final employee = Employee(
       id: DateTime.now().toString(), // Gera um ID único para o funcionário
       name: name,
-      email: '',
+      phone: '',
       password: password,
       selected: false,
     );
@@ -73,9 +75,14 @@ class Database {
   }
 
   // Remove um funcionário e seus registros de ponto
-  static void deleteEmployee(String employeeId) {
-    employees.removeWhere((e) => e.id == employeeId);
-    pontos.removeWhere((p) => p.id == employeeId);
+  static Future<void> deleteEmployee(String employeeId) async {
+    // Remove do Firestore
+    await FirebaseFirestore.instance
+        .collection('employees')
+        .doc(employeeId)
+        .delete();
+    // Opcional: remover pontos relacionados
+    // ...
   }
 
   // Retorna os registros de ponto de um funcionário específico

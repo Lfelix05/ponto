@@ -77,7 +77,8 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
             children: [
               TextFormField(
                 controller: _nameController,
-                decoration: InputDecoration(labelText: 'Nome'),
+                decoration: InputDecoration(labelText: 'Nome',
+                prefixIcon: Icon(Icons.person)),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor, insira seu nome';
@@ -87,7 +88,8 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
               ),
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(labelText: 'Email',
+                prefixIcon: Icon(Icons.email)),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -103,7 +105,8 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
               ),
               TextFormField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Senha'),
+                decoration: InputDecoration(labelText: 'Senha',
+                prefixIcon: Icon(Icons.lock)),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -117,7 +120,17 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
               ),
               TextFormField(
                 controller: _confirmPasswordController,
-                decoration: InputDecoration(labelText: 'Confirmar Senha'),
+                decoration: InputDecoration(labelText: 'Confirmar Senha',
+                prefixIcon: Icon(Icons.lock)),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor, confirme sua senha';
+                  }
+                  if (value != _passwordController.text) {
+                    return 'As senhas não coincidem';
+                  }
+                  return null;
+                },
                 obscureText: true,
               ),
               SizedBox(height: 20),

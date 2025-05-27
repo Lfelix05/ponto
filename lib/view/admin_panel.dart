@@ -17,6 +17,8 @@ class AdminPanel extends StatefulWidget {
 }
 
 class _AdminPanelState extends State<AdminPanel> {
+  int _reloadKey = 0; // Chave para recarregar a lista de funcionários
+
   //calcula as horas trabalhadas no mês
   double calcularHorasTrabalhadasPorMes(List<Ponto> pontos) {
     final now = DateTime.now();
@@ -36,61 +38,56 @@ class _AdminPanelState extends State<AdminPanel> {
   void _showCadastroFuncionarioDialog() {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text("Adicionar Funcionário"),
-            content: SizedBox(
-              width: 300,
-              height: 400,
-              child: StreamBuilder<QuerySnapshot>(
-                stream:
-                    FirebaseFirestore.instance
-                        .collection('employees')
-                        .where(
-                          'selected',
-                          isEqualTo: false,
-                        ) // só não selecionados
-                        .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData)
-                    return Center(child: CircularProgressIndicator());
-                  final docs = snapshot.data!.docs;
-                  if (docs.isEmpty) {
-                    return Center(child: Text("Nenhum funcionário disponível"));
-                  }
-                  return ListView.builder(
-                    itemCount: docs.length,
-                    itemBuilder: (context, index) {
-                      final data = docs[index].data() as Map<String, dynamic>;
-                      return ListTile(
-                        title: Text(data['name'] ?? ''),
-                        subtitle: Text(data['email'] ?? ''),
-                        trailing: ElevatedButton(
-                          child: Text("Adicionar"),
-                          onPressed: () async {
-                            await FirebaseFirestore.instance
-                                .collection('employees')
-                                .doc(docs[index].id)
-                                .update({'selected': true});
-                            Navigator.pop(
-                              context,
-                            ); // Fecha o pop-up após adicionar
-                            setState(() {}); // Atualiza a tela principal
-                          },
-                        ),
-                      );
-                    },
+      builder: (context) => AlertDialog(
+        title: Text("Adicionar Funcionário"),
+        content: SizedBox(
+          width: 300,
+          height: 400,
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('employees')
+                .where('selected', isEqualTo: false)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData)
+                return Center(child: CircularProgressIndicator());
+              final docs = snapshot.data!.docs;
+              if (docs.isEmpty) {
+                return Center(child: Text("Nenhum funcionário disponível"));
+              }
+              return ListView.builder(
+                itemCount: docs.length,
+                itemBuilder: (context, index) {
+                  final data = docs[index].data() as Map<String, dynamic>;
+                  return ListTile(
+                    title: Text(data['name'] ?? ''),
+                    subtitle: Text(data['phone'] ?? ''),
+                    trailing: ElevatedButton(
+                      child: Text("Adicionar"),
+                      onPressed: () async {
+                        await FirebaseFirestore.instance
+                            .collection('employees')
+                            .doc(docs[index].id)
+                            .update({'selected': true});
+                        Navigator.pop(context);
+                        setState(() {
+                          _reloadKey++; // Atualiza a lista principal
+                        });
+                      },
+                    ),
                   );
                 },
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text("Fechar"),
-              ),
-            ],
+              );
+            },
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Fechar"),
+          ),
+        ],
+      ),
     );
   }
 
@@ -101,10 +98,7 @@ class _AdminPanelState extends State<AdminPanel> {
         automaticallyImplyLeading: false,
         title: Text("Painel Administrativo"),
         actions: [
-          IconButton(
-            icon: Icon(Icons.add_circle_outline),
-            onPressed: _showCadastroFuncionarioDialog,
-          ),
+          
           // Botão para exibir informações do admin
           IconButton(
             icon: Icon(Icons.person),
@@ -119,8 +113,9 @@ class _AdminPanelState extends State<AdminPanel> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text("Nome: ${widget.admin.name}"),
+                          Text("Email: ${widget.admin.email}"),
+                          SizedBox(height: 20),
                           Text("ID: ${widget.admin.id}"),
-                          Text("Telefone: ${widget.admin.email}"),
                         ],
                       ),
                       actions: [
@@ -146,12 +141,14 @@ class _AdminPanelState extends State<AdminPanel> {
         ],
       ),
       body: FutureBuilder<List<Employee>>(
+        key: ValueKey(_reloadKey), // Adicione esta linha
         future: Database.getEmployees(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
+            print(snapshot.error);
             return Center(child: Text("Erro ao carregar funcionários"));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -175,13 +172,13 @@ class _AdminPanelState extends State<AdminPanel> {
                   if (pontosSnapshot.connectionState ==
                       ConnectionState.waiting) {
                     return ListTile(
-                      title: Text("${employee.name}"),
+                      title: Text(employee.name),
                       subtitle: Text("Carregando dados de ponto..."),
                     );
                   }
                   if (pontosSnapshot.hasError || !pontosSnapshot.hasData) {
                     return ListTile(
-                      title: Text("${employee.name}"),
+                      title: Text(employee.name),
                       subtitle: Text("Erro ao carregar dados de ponto"),
                     );
                   }
@@ -199,7 +196,8 @@ class _AdminPanelState extends State<AdminPanel> {
                   );
 
                   return ListTile(
-                    title: Text("${employee.name} (${employee.email})"),
+                    contentPadding: EdgeInsets.all(10),
+                    title: Text("${employee.name} (${employee.phone})"),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -327,11 +325,66 @@ class _AdminPanelState extends State<AdminPanel> {
                                       onPressed: () => Navigator.pop(context),
                                       child: Text("Cancelar"),
                                     ),
-                                    ElevatedButton(
+                                     ElevatedButton(
                                       onPressed: () {
-                                        Database.deleteEmployee(employee.id);
-                                        setState(() {});
-                                        Navigator.pop(context);
+                                        final TextEditingController confirmController = TextEditingController();
+                                        bool isNameCorrect = false;
+
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return StatefulBuilder(
+                                              builder: (context, setState) => AlertDialog(
+                                                title: Text("Excluir Funcionário"),
+                                                content: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Text(
+                                                      "Digite o nome funcionário para confirmar a exclusão:",
+                                                    ),
+                                                    SizedBox(height: 10),
+                                                    Text(
+                                                      employee.name,
+                                                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+                                                    ),
+                                                    SizedBox(height: 10),
+                                                    TextField(
+                                                      controller: confirmController,
+                                                      decoration: InputDecoration(
+                                                        labelText: "Nome",
+                                                        border: OutlineInputBorder(),
+                                                      ),
+                                                      onChanged: (value) {
+                                                        setState(() {
+                                                          isNameCorrect = value.trim() == employee.name.trim();
+                                                        });
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(context),
+                                                    child: Text("Cancelar"),
+                                                  ),
+                                                  ElevatedButton(
+                                                    onPressed: isNameCorrect
+                                                        ? () async {
+                                                            await Database.deleteEmployee(employee.id);
+                                                            setState(() {});
+                                                            Navigator.pop(context);
+                                                          }
+                                                        : null,
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor: isNameCorrect ? Colors.red : Colors.grey,
+                                                    ),
+                                                    child: Text("Excluir"),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        );
                                       },
                                       child: Text("Excluir"),
                                     ),
@@ -349,6 +402,14 @@ class _AdminPanelState extends State<AdminPanel> {
             },
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        onPressed: _showCadastroFuncionarioDialog,
+        tooltip: "Adicionar Funcionário",
+        child: Icon(Icons.add),
       ),
     );
   }

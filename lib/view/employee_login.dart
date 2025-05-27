@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ponto/view/employee_panel.dart';
 import 'package:ponto/view/employee_register.dart';
@@ -13,30 +12,34 @@ class EmployeeLogin extends StatefulWidget {
 }
 
 class _EmployeeLoginState extends State<EmployeeLogin> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController smsCodeController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   Future<void> _loginEmployee(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
-      final email = emailController.text;
-      final password = passwordController.text;
-
       try {
-        // Autentica com Firebase Auth
-        final userCredential = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: email, password: password);
+        final phone = phoneController.text.trim();
+        final password = smsCodeController.text; // Renomeie para passwordController
 
-        // Busca os dados do funcionário no Firestore usando o UID
-        final uid = userCredential.user!.uid;
-        final doc =
-            await FirebaseFirestore.instance
-                .collection('employees')
-                .doc(uid)
-                .get();
+        // Busca o funcionário pelo telefone
+        final query = await FirebaseFirestore.instance
+            .collection('employees')
+            .where('phone', isEqualTo: phone)
+            .limit(1)
+            .get();
 
-        if (doc.exists) {
-          final employee = Employee.fromJson(doc.data()!);
+        if (query.docs.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Funcionário não encontrado.')),
+          );
+          return;
+        }
+
+        final data = query.docs.first.data();
+        // Se usar hash, compare o hash da senha digitada com o salvo
+        if (data['password'] == password) {
+          final employee = Employee.fromJson(data);
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -45,21 +48,23 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Funcionário não encontrado no banco de dados.'),
-            ),
+            SnackBar(content: Text('Senha incorreta.')),
           );
         }
-      } on FirebaseAuthException catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro de autenticação: ${e.message}')),
-        );
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro: $e')),
+        );
       }
     }
+  }
+
+  String formatPhone(String phone) {
+    // Adiciona +55 se não começar com +
+    if (!phone.startsWith('+')) {
+      return '+55' + phone;
+    }
+    return phone;
   }
 
   @override
@@ -73,35 +78,48 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Text(
+                'Bem-vindo!',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF23608D),
+                ),
+              ),
+              SizedBox(height: 32),
               TextFormField(
-                controller: emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                controller: phoneController,
+                decoration: InputDecoration(
+                  labelText: 'Telefone',
+                  prefixIcon: Icon(Icons.phone, color: Color(0xFF23608D)),
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor, insira o email';
+                    return 'Por favor, insira o telefone';
                   }
-                  if (!RegExp(
-                    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-                  ).hasMatch(value)) {
-                    return 'Por favor, insira um email válido';
+                  if (!RegExp(r'^\+?[0-9]{10,15}$').hasMatch(value)) {
+                    return 'Por favor, insira um telefone válido';
                   }
                   return null;
                 },
-                keyboardType: TextInputType.emailAddress,
+                keyboardType: TextInputType.phone,
               ),
+              SizedBox(height: 16),
               TextFormField(
-                controller: passwordController,
-                decoration: InputDecoration(labelText: 'Senha'),
+                controller: smsCodeController, // Renomeie para passwordController
+                decoration: InputDecoration(
+                  labelText: 'Senha',
+                  prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),
+                ),
+                obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor, insira a senha';
                   }
                   return null;
                 },
-                keyboardType: TextInputType.text,
-                obscureText: true,
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () => _loginEmployee(context),
                 child: Text('Entrar'),

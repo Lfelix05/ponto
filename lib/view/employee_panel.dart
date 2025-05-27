@@ -186,8 +186,9 @@ class _EmployeePanelState extends State<EmployeePanel> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text("Nome: ${widget.employee.name}"),
+                          Text("Telefone: ${widget.employee.phone}"),
+                          SizedBox(height: 20),
                           Text("ID: ${widget.employee.id}"),
-                          Text("Email: ${widget.employee.email}"),
                         ],
                       ),
                       actions: [
@@ -258,6 +259,9 @@ class _EmployeePanelState extends State<EmployeePanel> {
                   ),
                   SizedBox(width: 20),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _hasCheckedIn ? Colors.red : Colors.grey,
+                    ),
                     onPressed: _hasCheckedIn ? _checkOut : null,
                     child: Text("Check-out"),
                   ),

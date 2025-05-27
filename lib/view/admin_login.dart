@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../admin.dart';
 import 'admin_panel.dart';
-import 'cadastro_admin.dart';
+import 'admin_register.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -63,9 +63,19 @@ class _LoginScreenState extends State<LoginScreen> {
           key: _formKey,
           child: Column(
             children: [
+              Text(
+                'Bem-vindo!',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF23608D),
+                ),
+              ),
+              SizedBox(height: 32),
               TextFormField(
                 controller: _loginController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(labelText: 'Email',
+                prefixIcon: Icon(Icons.email, color: Color(0xFF23608D)),),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor, insira seu Email';
@@ -75,7 +85,8 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               TextFormField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Senha'),
+                decoration: InputDecoration(labelText: 'Senha',
+                prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -91,8 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AdminRegisterScreen(),
-                    ),
+                      builder: (context) => AdminRegisterScreen(),),
                   );
                 },
                 child: Text('Não tem conta? Cadastre-se'),
