@@ -13,14 +13,14 @@ class EmployeeLogin extends StatefulWidget {
 
 class _EmployeeLoginState extends State<EmployeeLogin> {
   final TextEditingController phoneController = TextEditingController();
-  final TextEditingController smsCodeController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   Future<void> _loginEmployee(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       try {
         final phone = phoneController.text.trim();
-        final password = smsCodeController.text; // Renomeie para passwordController
+        final password = passwordController.text;
 
         // Busca o funcionário pelo telefone
         final query = await FirebaseFirestore.instance
@@ -62,7 +62,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
   String formatPhone(String phone) {
     // Adiciona +55 se não começar com +
     if (!phone.startsWith('+')) {
-      return '+55' + phone;
+      return '+55$phone';
     }
     return phone;
   }
@@ -106,7 +106,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
               ),
               SizedBox(height: 16),
               TextFormField(
-                controller: smsCodeController, // Renomeie para passwordController
+                controller: passwordController,
                 decoration: InputDecoration(
                   labelText: 'Senha',
                   prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),
