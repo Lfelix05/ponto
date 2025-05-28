@@ -74,7 +74,11 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
         child: Form(
           key: _formKey,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Text('Preencha os dados para se cadastrar',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                SizedBox(height: 32),
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(labelText: 'Nome',
@@ -86,6 +90,7 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
                   return null;
                 },
               ),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(labelText: 'Email',
@@ -103,6 +108,7 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
                   return null;
                 },
               ),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(labelText: 'Senha',
@@ -118,6 +124,7 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
                   return null;
                 },
               ),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _confirmPasswordController,
                 decoration: InputDecoration(labelText: 'Confirmar Senha',
@@ -136,14 +143,6 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
               SizedBox(height: 20),
               ElevatedButton(onPressed: _register, child: Text('Cadastrar')),
             
-              TextButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                  );
-                },
-                child: Text('Já tem uma conta? Faça login!')),
               
                 ],
           ),

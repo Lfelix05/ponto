@@ -88,6 +88,10 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Text(
+                'Preencha os dados para se cadastrar',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+              const SizedBox(height: 32),
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Nome Completo',
@@ -99,6 +103,7 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                   return null;
                 },
               ),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _phoneController,
                 decoration: const InputDecoration(labelText: 'Telefone',
@@ -115,6 +120,7 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                   return null;
                 },
               ),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
                 decoration: const InputDecoration(labelText: 'Senha',
@@ -130,6 +136,7 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                   return null;
                 },
               ),
+              SizedBox(height: 16),
               TextFormField(
                 controller: _confirmPasswordController,
                 decoration:

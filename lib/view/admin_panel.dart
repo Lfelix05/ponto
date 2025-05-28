@@ -35,59 +35,81 @@ class _AdminPanelState extends State<AdminPanel> {
     });
   }
 
+  //calcula as horas trabalhadas por dia
+  double horasTrabalhadasPorDia(List<Ponto> pontos, DateTime dia) {
+    final pontosDoDia = pontos.where(
+      (p) =>
+          p.checkIn.day == dia.day &&
+          p.checkIn.month == dia.month &&
+          p.checkIn.year == dia.year,
+    );
+    return pontosDoDia.fold(0.0, (total, ponto) {
+      if (ponto.checkOut != null) {
+        final duracao = ponto.checkOut!.difference(ponto.checkIn).inHours;
+        return total + duracao;
+      }
+      return total;
+    });
+  }
+
   void _showCadastroFuncionarioDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Adicionar Funcionário"),
-        content: SizedBox(
-          width: 300,
-          height: 400,
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('employees')
-                .where('selected', isEqualTo: false)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData)
-                return Center(child: CircularProgressIndicator());
-              final docs = snapshot.data!.docs;
-              if (docs.isEmpty) {
-                return Center(child: Text("Nenhum funcionário disponível"));
-              }
-              return ListView.builder(
-                itemCount: docs.length,
-                itemBuilder: (context, index) {
-                  final data = docs[index].data() as Map<String, dynamic>;
-                  return ListTile(
-                    title: Text(data['name'] ?? ''),
-                    subtitle: Text(data['phone'] ?? ''),
-                    trailing: ElevatedButton(
-                      child: Text("Adicionar"),
-                      onPressed: () async {
-                        await FirebaseFirestore.instance
-                            .collection('employees')
-                            .doc(docs[index].id)
-                            .update({'selected': true});
-                        Navigator.pop(context);
-                        setState(() {
-                          _reloadKey++; // Atualiza a lista principal
-                        });
-                      },
-                    ),
+      builder:
+          (context) => AlertDialog(
+            title: Text("Adicionar Funcionário"),
+            content: SizedBox(
+              width: 300,
+              height: 400,
+              child: StreamBuilder<QuerySnapshot>(
+                stream:
+                    FirebaseFirestore.instance
+                        .collection('employees')
+                        .where('selected', isEqualTo: false)
+                        .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData)
+                    return Center(child: CircularProgressIndicator());
+                  final docs = snapshot.data!.docs;
+                  if (docs.isEmpty) {
+                    return Center(child: Text("Nenhum funcionário disponível"));
+                  }
+                  return ListView.builder(
+                    itemCount: docs.length,
+                    itemBuilder: (context, index) {
+                      final data = docs[index].data() as Map<String, dynamic>;
+                      return ListTile(
+                        title: Text(data['name'] ?? ''),
+                        subtitle: Text(data['phone'] ?? ''),
+                        trailing: ElevatedButton(
+                          child: Text("Adicionar"),
+                          onPressed: () async {
+                            await FirebaseFirestore.instance
+                                .collection('employees')
+                                .doc(docs[index].id)
+                                .update({
+                                  'selected': true,
+                                  'adminId': widget.admin.id,
+                                });
+                            setState(() {
+                              _reloadKey++; // Atualiza a lista principal ANTES de fechar o diálogo
+                            });
+                            Navigator.pop(context);
+                          },
+                        )
+                      );
+                    },
                   );
                 },
-              );
-            },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("Fechar"),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Fechar"),
-          ),
-        ],
-      ),
     );
   }
 
@@ -98,7 +120,6 @@ class _AdminPanelState extends State<AdminPanel> {
         automaticallyImplyLeading: false,
         title: Text("Painel Administrativo"),
         actions: [
-          
           // Botão para exibir informações do admin
           IconButton(
             icon: Icon(Icons.person),
@@ -141,8 +162,10 @@ class _AdminPanelState extends State<AdminPanel> {
         ],
       ),
       body: FutureBuilder<List<Employee>>(
-        key: ValueKey(_reloadKey), // Adicione esta linha
-        future: Database.getEmployees(),
+        key: ValueKey(_reloadKey),
+        future: Database.getEmployees(
+          widget.admin.id,
+        ), // Passe o id do admin aqui
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -207,7 +230,12 @@ class _AdminPanelState extends State<AdminPanel> {
                         Text(
                           "Última Saída: ${pontos.isNotEmpty && pontos.last.checkOut != null ? DateFormat('MM/dd/yyyy HH:mm').format(pontos.last.checkOut!) : 'Ainda trabalhando'}",
                         ),
-                        Text("Horas trabalhadas no mês: $horasTrabalhadas"),
+                        Text(
+                          "Horas trabalhadas hoje: ${horasTrabalhadasPorDia(pontos, DateTime.now()).toStringAsFixed(2)}",
+                        ),
+                        Text(
+                          "Horas trabalhadas no mês: ${horasTrabalhadas.toStringAsFixed(2)}",
+                        ),
                       ],
                     ),
                     trailing: Row(
@@ -321,72 +349,105 @@ class _AdminPanelState extends State<AdminPanel> {
                                     "Você tem certeza que deseja excluir ${employee.name}?",
                                   ),
                                   actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: Text("Cancelar"),
-                                    ),
-                                     ElevatedButton(
-                                      onPressed: () {
-                                        final TextEditingController confirmController = TextEditingController();
-                                        bool isNameCorrect = false;
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(context),
+                                          child: Text("Cancelar"),
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            padding: EdgeInsets.symmetric(horizontal: 12),
+                                            minimumSize: Size(0, 36),
+                                            backgroundColor: Colors.blue,
+                                          ),
+                                          onPressed: () async {
+                                            final db = Database();
+                                            await db.removeEmployee(employee.id, employee.selected);
+                                            setState(() {
+                                              _reloadKey++;
+                                            });
+                                            Navigator.pop(context);
+                                          },
+                                          child: Text("Remover da lista"),
+                                        ),
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            padding: EdgeInsets.symmetric(horizontal: 12),
+                                            minimumSize: Size(0, 36),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                          onPressed: () {
+                                            final TextEditingController confirmController = TextEditingController();
+                                            bool isNameCorrect = false;
 
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) {
-                                            return StatefulBuilder(
-                                              builder: (context, setState) => AlertDialog(
-                                                title: Text("Excluir Funcionário"),
-                                                content: Column(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    Text(
-                                                      "Digite o nome funcionário para confirmar a exclusão:",
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                return StatefulBuilder(
+                                                  builder: (context, setState) => AlertDialog(
+                                                    title: Text("Excluir Funcionário"),
+                                                    content: Column(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        Text("Digite o nome funcionário para confirmar a exclusão:"),
+                                                        SizedBox(height: 10),
+                                                        Text(
+                                                          employee.name,
+                                                          style: TextStyle(
+                                                            fontWeight: FontWeight.bold,
+                                                            color: Colors.red,
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: 10),
+                                                        TextField(
+                                                          controller: confirmController,
+                                                          decoration: InputDecoration(
+                                                            labelText: "Nome",
+                                                            border: OutlineInputBorder(),
+                                                          ),
+                                                          onChanged: (value) {
+                                                            setState(() {
+                                                              isNameCorrect = value.trim() == employee.name.trim();
+                                                            });
+                                                          },
+                                                        ),
+                                                        SizedBox(height: 10),
+                                                        Text("*Isso irá excluir permanentemente ${employee.name} e todos os dados relacionados à ele.*",
+                                                        style: TextStyle(
+                                                          color: Colors.red,
+                                                          fontSize: 12,
+                                                        )),
+                                                      ],
                                                     ),
-                                                    SizedBox(height: 10),
-                                                    Text(
-                                                      employee.name,
-                                                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-                                                    ),
-                                                    SizedBox(height: 10),
-                                                    TextField(
-                                                      controller: confirmController,
-                                                      decoration: InputDecoration(
-                                                        labelText: "Nome",
-                                                        border: OutlineInputBorder(),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () => Navigator.pop(context),
+                                                        child: Text("Cancelar"),
                                                       ),
-                                                      onChanged: (value) {
-                                                        setState(() {
-                                                          isNameCorrect = value.trim() == employee.name.trim();
-                                                        });
-                                                      },
-                                                    ),
-                                                  ],
-                                                ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () => Navigator.pop(context),
-                                                    child: Text("Cancelar"),
+                                                      ElevatedButton(
+                                                        onPressed: isNameCorrect
+                                                            ? () async {
+                                                                await Database.deleteEmployee(employee.id);
+                                                                setState(() {});
+                                                                Navigator.pop(context);
+                                                              }
+                                                            : null,
+                                                        style: ElevatedButton.styleFrom(
+                                                          backgroundColor: isNameCorrect ? Colors.red : Colors.grey,
+                                                        ),
+                                                        child: Text("Excluir"),
+                                                      ),
+                                                    ],
                                                   ),
-                                                  ElevatedButton(
-                                                    onPressed: isNameCorrect
-                                                        ? () async {
-                                                            await Database.deleteEmployee(employee.id);
-                                                            setState(() {});
-                                                            Navigator.pop(context);
-                                                          }
-                                                        : null,
-                                                    style: ElevatedButton.styleFrom(
-                                                      backgroundColor: isNameCorrect ? Colors.red : Colors.grey,
-                                                    ),
-                                                    child: Text("Excluir"),
-                                                  ),
-                                                ],
-                                              ),
+                                                );
+                                              },
                                             );
                                           },
-                                        );
-                                      },
-                                      child: Text("Excluir"),
+                                          child: Text("Excluir"),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 );
@@ -404,9 +465,6 @@ class _AdminPanelState extends State<AdminPanel> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
         onPressed: _showCadastroFuncionarioDialog,
         tooltip: "Adicionar Funcionário",
         child: Icon(Icons.add),

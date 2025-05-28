@@ -10,16 +10,15 @@ class Database {
   static List<Ponto> pontos = [];
 
   // Retorna a lista de funcionários
-  static Future<List<Employee>> getEmployees() async {
+  static Future<List<Employee>> getEmployees(String adminId) async {
     final snapshot =
         await FirebaseFirestore.instance
             .collection('employees')
             .where('selected', isEqualTo: true)
+            .where('adminId', isEqualTo: adminId)
             .get();
 
-    return snapshot.docs
-        .map((doc) => Employee.fromJson(doc.data()))
-        .toList();
+    return snapshot.docs.map((doc) => Employee.fromJson(doc.data())).toList();
   }
 
   // Adiciona um novo funcionário
@@ -96,5 +95,12 @@ class Database {
             .get();
 
     return snapshot.docs.map((doc) => Ponto.fromJson(doc.data())).toList();
+  }
+
+  Future<void> removeEmployee(employeeId, selected) async {
+    await FirebaseFirestore.instance
+        .collection('employees')
+        .doc(employeeId)
+        .update({'selected': false});
   }
 }
