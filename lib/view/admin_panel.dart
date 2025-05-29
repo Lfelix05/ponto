@@ -7,6 +7,9 @@ import 'admin_login.dart';
 import '/ponto.dart';
 import 'package:intl/intl.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../utils/hours.dart';
+import '../utils/delete_employee.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminPanel extends StatefulWidget {
   final Admin admin;
@@ -18,39 +21,6 @@ class AdminPanel extends StatefulWidget {
 
 class _AdminPanelState extends State<AdminPanel> {
   int _reloadKey = 0; // Chave para recarregar a lista de funcionários
-
-  //calcula as horas trabalhadas no mês
-  double calcularHorasTrabalhadasPorMes(List<Ponto> pontos) {
-    final now = DateTime.now();
-    final pontosDoMes = pontos.where(
-      (p) => p.checkIn.month == now.month && p.checkIn.year == now.year,
-    );
-    //soma as horas trabalhadas
-    return pontosDoMes.fold(0.0, (total, ponto) {
-      if (ponto.checkOut != null) {
-        final duracao = ponto.checkOut!.difference(ponto.checkIn).inHours;
-        return total + duracao;
-      }
-      return total;
-    });
-  }
-
-  //calcula as horas trabalhadas por dia
-  double horasTrabalhadasPorDia(List<Ponto> pontos, DateTime dia) {
-    final pontosDoDia = pontos.where(
-      (p) =>
-          p.checkIn.day == dia.day &&
-          p.checkIn.month == dia.month &&
-          p.checkIn.year == dia.year,
-    );
-    return pontosDoDia.fold(0.0, (total, ponto) {
-      if (ponto.checkOut != null) {
-        final duracao = ponto.checkOut!.difference(ponto.checkIn).inHours;
-        return total + duracao;
-      }
-      return total;
-    });
-  }
 
   void _showCadastroFuncionarioDialog() {
     showDialog(
@@ -96,7 +66,7 @@ class _AdminPanelState extends State<AdminPanel> {
                             });
                             Navigator.pop(context);
                           },
-                        )
+                        ),
                       );
                     },
                   );
@@ -150,9 +120,12 @@ class _AdminPanelState extends State<AdminPanel> {
             },
           ),
           IconButton(
+            // Botão de logout
             icon: Icon(Icons.logout),
             onPressed: () async {
               // Faz logout do Firebase Auth
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.clear();
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -162,6 +135,7 @@ class _AdminPanelState extends State<AdminPanel> {
         ],
       ),
       body: FutureBuilder<List<Employee>>(
+        // FutureBuilder para carregar os funcionários
         key: ValueKey(_reloadKey),
         future: Database.getEmployees(
           widget.admin.id,
@@ -177,7 +151,7 @@ class _AdminPanelState extends State<AdminPanel> {
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text("Nenhum funcionário cadastrado"));
           }
-
+          // Lista de funcionários carregada com sucesso
           return ListView.builder(
             itemCount: snapshot.data!.length,
             itemBuilder: (context, index) {
@@ -217,7 +191,7 @@ class _AdminPanelState extends State<AdminPanel> {
                   final horasTrabalhadas = calcularHorasTrabalhadasPorMes(
                     pontos,
                   );
-
+                  // Exibe os dados do funcionário e seus pontos
                   return ListTile(
                     contentPadding: EdgeInsets.all(10),
                     title: Text("${employee.name} (${employee.phone})"),
@@ -342,116 +316,26 @@ class _AdminPanelState extends State<AdminPanel> {
                           onPressed: () {
                             showDialog(
                               context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: Text("Excluir Funcionário"),
-                                  content: Text(
-                                    "Você tem certeza que deseja excluir ${employee.name}?",
+                              builder:
+                                  (context) => DeleteEmployeeDialog(
+                                    employeeName: employee.name,
+                                    onRemoveFromList: () async {
+                                      await Database.removeEmployee(
+                                        employee.id,
+                                      );
+                                      setState(() {
+                                        _reloadKey++;
+                                      });
+                                    },
+                                    onConfirm: () async {
+                                      await Database.deleteEmployee(
+                                        employee.id,
+                                      );
+                                      setState(() {
+                                        _reloadKey++;
+                                      });
+                                    },
                                   ),
-                                  actions: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context),
-                                          child: Text("Cancelar"),
-                                        ),
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            padding: EdgeInsets.symmetric(horizontal: 12),
-                                            minimumSize: Size(0, 36),
-                                            backgroundColor: Colors.blue,
-                                          ),
-                                          onPressed: () async {
-                                            final db = Database();
-                                            await db.removeEmployee(employee.id, employee.selected);
-                                            setState(() {
-                                              _reloadKey++;
-                                            });
-                                            Navigator.pop(context);
-                                          },
-                                          child: Text("Remover da lista"),
-                                        ),
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            padding: EdgeInsets.symmetric(horizontal: 12),
-                                            minimumSize: Size(0, 36),
-                                            backgroundColor: Colors.red,
-                                          ),
-                                          onPressed: () {
-                                            final TextEditingController confirmController = TextEditingController();
-                                            bool isNameCorrect = false;
-
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) {
-                                                return StatefulBuilder(
-                                                  builder: (context, setState) => AlertDialog(
-                                                    title: Text("Excluir Funcionário"),
-                                                    content: Column(
-                                                      mainAxisSize: MainAxisSize.min,
-                                                      children: [
-                                                        Text("Digite o nome funcionário para confirmar a exclusão:"),
-                                                        SizedBox(height: 10),
-                                                        Text(
-                                                          employee.name,
-                                                          style: TextStyle(
-                                                            fontWeight: FontWeight.bold,
-                                                            color: Colors.red,
-                                                          ),
-                                                        ),
-                                                        SizedBox(height: 10),
-                                                        TextField(
-                                                          controller: confirmController,
-                                                          decoration: InputDecoration(
-                                                            labelText: "Nome",
-                                                            border: OutlineInputBorder(),
-                                                          ),
-                                                          onChanged: (value) {
-                                                            setState(() {
-                                                              isNameCorrect = value.trim() == employee.name.trim();
-                                                            });
-                                                          },
-                                                        ),
-                                                        SizedBox(height: 10),
-                                                        Text("*Isso irá excluir permanentemente ${employee.name} e todos os dados relacionados à ele.*",
-                                                        style: TextStyle(
-                                                          color: Colors.red,
-                                                          fontSize: 12,
-                                                        )),
-                                                      ],
-                                                    ),
-                                                    actions: [
-                                                      TextButton(
-                                                        onPressed: () => Navigator.pop(context),
-                                                        child: Text("Cancelar"),
-                                                      ),
-                                                      ElevatedButton(
-                                                        onPressed: isNameCorrect
-                                                            ? () async {
-                                                                await Database.deleteEmployee(employee.id);
-                                                                setState(() {});
-                                                                Navigator.pop(context);
-                                                              }
-                                                            : null,
-                                                        style: ElevatedButton.styleFrom(
-                                                          backgroundColor: isNameCorrect ? Colors.red : Colors.grey,
-                                                        ),
-                                                        child: Text("Excluir"),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            );
-                                          },
-                                          child: Text("Excluir"),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                );
-                              },
                             );
                           },
                         ),

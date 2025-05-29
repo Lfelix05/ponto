@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../admin.dart';
 import 'admin_login.dart';
+import '../utils/validator.dart';
 
 class AdminRegisterScreen extends StatefulWidget {
   const AdminRegisterScreen({super.key});
@@ -96,17 +97,7 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
                 decoration: InputDecoration(labelText: 'Email',
                 prefixIcon: Icon(Icons.email)),
                 keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira seu email';
-                  }
-                  if (!RegExp(
-                          r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-                      .hasMatch(value)) {
-                    return 'Por favor, insira um email válido';
-                  }
-                  return null;
-                },
+                validator: isAvalidEmail.validate,
               ),
               SizedBox(height: 16),
               TextFormField(
@@ -114,30 +105,17 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
                 decoration: InputDecoration(labelText: 'Senha',
                 prefixIcon: Icon(Icons.lock)),
                 obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira uma senha';
-                  }
-                  if (value.length < 6) {
-                    return 'A senha deve ter pelo menos 6 caracteres';
-                  }
-                  return null;
-                },
+                validator: isAvalidPassword.validate,
               ),
               SizedBox(height: 16),
               TextFormField(
                 controller: _confirmPasswordController,
                 decoration: InputDecoration(labelText: 'Confirmar Senha',
                 prefixIcon: Icon(Icons.lock)),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, confirme sua senha';
-                  }
-                  if (value != _passwordController.text) {
-                    return 'As senhas não coincidem';
-                  }
-                  return null;
-                },
+                validator: (value) => confirmPassword.validate(
+                  value ?? '',
+                  _passwordController.text,
+                ),
                 obscureText: true,
               ),
               SizedBox(height: 20),

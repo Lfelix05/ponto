@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ponto/utils/validator.dart';
 import 'package:ponto/view/employee_login.dart';
 import '../employee.dart';
 
@@ -109,16 +110,7 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                 decoration: const InputDecoration(labelText: 'Telefone',
                 prefixIcon: Icon(Icons.phone, color: Color(0xFF23608D)),),
                 keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira seu telefone';
-                  }
-                  if (!RegExp(r'^\+?[0-9]{10,15}$').hasMatch(value)) {
-                    return 'Por favor, insira um telefone válido';
-                }
-                  
-                  return null;
-                },
+                validator: isAvalidPhone.validate,
               ),
               SizedBox(height: 16),
               TextFormField(
@@ -126,15 +118,7 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                 decoration: const InputDecoration(labelText: 'Senha',
                 prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),),
                 obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira sua senha';
-                  }
-                  if (value.length < 6) {
-                    return 'A senha deve ter pelo menos 6 caracteres';
-                  }
-                  return null;
-                },
+                validator: isAvalidPassword.validate,
               ),
               SizedBox(height: 16),
               TextFormField(
@@ -143,15 +127,10 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                     const InputDecoration(labelText: 'Confirmar Senha',
                     prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),),
                 obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, confirme sua senha';
-                  }
-                  if (value != _passwordController.text) {
-                    return 'As senhas não coincidem';
-                  }
-                  return null;
-                },
+                validator: (value) => confirmPassword.validate(
+                  value ?? '',
+                  _passwordController.text,
+                ),
               ),
               const SizedBox(height: 20),
               ElevatedButton(

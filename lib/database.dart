@@ -96,8 +96,8 @@ class Database {
 
     return snapshot.docs.map((doc) => Ponto.fromJson(doc.data())).toList();
   }
-
-  Future<void> removeEmployee(employeeId, selected) async {
+  //Remove um funcionário da lista de selecionados
+  static Future<void> removeEmployee(employeeId) async {
     await FirebaseFirestore.instance
         .collection('employees')
         .doc(employeeId)

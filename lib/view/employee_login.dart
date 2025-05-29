@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ponto/utils/validator.dart';
 import 'package:ponto/view/employee_panel.dart';
 import 'package:ponto/view/employee_register.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../employee.dart';
 
 class EmployeeLogin extends StatefulWidget {
@@ -23,11 +25,12 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
         final password = passwordController.text;
 
         // Busca o funcionário pelo telefone
-        final query = await FirebaseFirestore.instance
-            .collection('employees')
-            .where('phone', isEqualTo: phone)
-            .limit(1)
-            .get();
+        final query =
+            await FirebaseFirestore.instance
+                .collection('employees')
+                .where('phone', isEqualTo: phone)
+                .limit(1)
+                .get();
 
         if (query.docs.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -40,6 +43,12 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
         // Se usar hash, compare o hash da senha digitada com o salvo
         if (data['password'] == password) {
           final employee = Employee.fromJson(data);
+
+          // Salvar informações no SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('userType', 'employee');
+          await prefs.setString('userId', employee.id);
+
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -47,14 +56,14 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
             ),
           );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Senha incorreta.')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Senha incorreta.')));
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
       }
     }
   }
@@ -93,15 +102,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                   labelText: 'Telefone',
                   prefixIcon: Icon(Icons.phone, color: Color(0xFF23608D)),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira o telefone';
-                  }
-                  if (!RegExp(r'^\+?[0-9]{10,15}$').hasMatch(value)) {
-                    return 'Por favor, insira um telefone válido';
-                  }
-                  return null;
-                },
+                validator: isAvalidPhone.validate,
                 keyboardType: TextInputType.phone,
               ),
               SizedBox(height: 16),
@@ -112,12 +113,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                   prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),
                 ),
                 obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira a senha';
-                  }
-                  return null;
-                },
+                validator: isAvalidPassword.validate,
               ),
               SizedBox(height: 32),
               ElevatedButton(

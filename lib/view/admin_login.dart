@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../admin.dart';
 import 'admin_panel.dart';
 import 'admin_register.dart';
+import '../utils/validator.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,10 +13,13 @@ class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
+
 class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();              // Controle do formulário
-  final _loginController = TextEditingController();     // Controlador para o campo de email
-  final _passwordController = TextEditingController();  // Controlador para o campo de senha
+  final _formKey = GlobalKey<FormState>(); // Controle do formulário
+  final _loginController =
+      TextEditingController(); // Controlador para o campo de email
+  final _passwordController =
+      TextEditingController(); // Controlador para o campo de senha
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
@@ -36,6 +41,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
         if (doc.exists) {
           final admin = Admin.fromJson(doc.data()!);
+
+          // Salva informações no SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('userType', 'admin');
+          await prefs.setString('userId', admin.id);
+
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => AdminPanel(admin: admin)),
@@ -75,27 +86,21 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: 32),
               TextFormField(
                 controller: _loginController,
-                decoration: InputDecoration(labelText: 'Email',
-                prefixIcon: Icon(Icons.email, color: Color(0xFF23608D)),),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira seu Email';
-                  }
-                  return null;
-                },
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: Icon(Icons.email, color: Color(0xFF23608D)),
+                ),
+                validator: isAvalidEmail.validate,
               ),
               SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Senha',
-                prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),),
+                decoration: InputDecoration(
+                  labelText: 'Senha',
+                  prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),
+                ),
                 obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira sua senha';
-                  }
-                  return null;
-                },
+                validator: isAvalidPassword.validate,
               ),
               SizedBox(height: 20),
               ElevatedButton(onPressed: _login, child: Text('Entrar')),
@@ -104,7 +109,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AdminRegisterScreen(),),
+                      builder: (context) => AdminRegisterScreen(),
+                    ),
                   );
                 },
                 child: Text('Não tem conta? Cadastre-se'),

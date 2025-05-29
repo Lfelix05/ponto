@@ -1,10 +1,13 @@
-import '/employee.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '/employee.dart';
 import '../database.dart';
 import '../ponto.dart';
-import 'package:intl/intl.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../utils/Geo-Check.dart';
+import '../utils/hours.dart';
 
 class EmployeePanel extends StatefulWidget {
   final Employee employee;
@@ -34,41 +37,10 @@ class _EmployeePanelState extends State<EmployeePanel> {
     }
   }
 
-  Future<String> _getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Verifica se o serviço de localização está habilitado
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return "Serviço de localização desativado";
-    }
-
-    // Verifica as permissões de localização
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return "Permissão de localização negada";
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return "Permissão de localização permanentemente negada";
-    }
-
-    // Obtém a localização atual
-    final position = await Geolocator.getCurrentPosition(
-      // ignore: deprecated_member_use
-      desiredAccuracy: LocationAccuracy.high,
-    );
-
-    return "${position.latitude}, ${position.longitude}";
-  }
-
-  void _checkIn() async {
+  // Método para realizar o check-in
+  void checkIn() async {
     final now = DateTime.now();
-    final location = await _getCurrentLocation();
+    final location = await getCurrentLocation();
 
     // Salva no Firestore
     await FirebaseFirestore.instance
@@ -98,9 +70,10 @@ class _EmployeePanelState extends State<EmployeePanel> {
     ).showSnackBar(SnackBar(content: Text('Check-in realizado com sucesso!')));
   }
 
-  void _checkOut() async {
+  // Método para realizar o check-out
+  void checkOut() async {
     final now = DateTime.now();
-    final location = await _getCurrentLocation();
+    final location = await getCurrentLocation();
 
     if (_currentPonto != null) {
       // Busca o último ponto aberto (sem checkOut)
@@ -138,30 +111,10 @@ class _EmployeePanelState extends State<EmployeePanel> {
     }
   }
 
-  double _calcularHorasTrabalhadasNoDia() {
-    if (_currentPonto != null && _currentPonto!.checkOut != null) {
-      return _currentPonto!.checkOut!
-          .difference(_currentPonto!.checkIn)
-          .inHours
-          .toDouble();
-    }
-    return 0.0;
-  }
-
-  Future<double> _calcularHorasTrabalhadasNoMes() {
-    // Simula o cálculo de horas trabalhadas no mês
-    return Database.getPontosByEmployeeId(widget.employee.id).then((pontos) {
-      final now = DateTime.now();
-      final pontosDoMes = pontos.where(
-        (p) => p.checkIn.month == now.month && p.checkIn.year == now.year,
-      );
-      return pontosDoMes.fold<double>(0.0, (double total, ponto) {
-        if (ponto.checkOut != null) {
-          return total + ponto.checkOut!.difference(ponto.checkIn).inHours;
-        }
-        return total;
-      });
-    });
+  // Método para limpar dados locais (ex: ao fazer logout)
+  void _clearLocalData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
   }
 
   @override
@@ -204,6 +157,7 @@ class _EmployeePanelState extends State<EmployeePanel> {
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
+              _clearLocalData(); // Limpa dados locais ao sair
               Navigator.pop(context);
             },
           ),
@@ -231,41 +185,55 @@ class _EmployeePanelState extends State<EmployeePanel> {
                     : "Check-out realizado às: ${_currentPonto?.checkOut != null ? dateFormat.format(_currentPonto!.checkOut!) : 'N/A'}",
                 style: TextStyle(fontSize: 16),
               ),
-              SizedBox(height: 10),
-              Text(
-                "Horas trabalhadas hoje: ${_calcularHorasTrabalhadasNoDia()}",
-                style: TextStyle(fontSize: 16),
-              ),
-              SizedBox(height: 10),
-              FutureBuilder<double>(
-                future: _calcularHorasTrabalhadasNoMes(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Text("Calculando horas trabalhadas no mês...");
-                  }
-                  return Text(
-                    "Horas trabalhadas no mês: ${snapshot.data ?? 0.0}",
-                    style: TextStyle(fontSize: 16),
-                  );
-                },
-              ),
+
               SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed: _hasCheckedIn ? null : _checkIn,
-                    child: Text("Check-in"),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 40),
+                      minimumSize: Size(0, 70),
+                      backgroundColor:
+                          _hasCheckedIn ? Colors.grey : Colors.green,
+                    ),
+                    onPressed: _hasCheckedIn ? null : checkIn,
+                    child: Text("Check-in", style: TextStyle(fontSize: 20)),
                   ),
-                  SizedBox(width: 20),
+                  SizedBox(width: 10),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 40),
+                      minimumSize: Size(0, 70),
                       backgroundColor: _hasCheckedIn ? Colors.red : Colors.grey,
                     ),
-                    onPressed: _hasCheckedIn ? _checkOut : null,
-                    child: Text("Check-out"),
+                    onPressed: _hasCheckedIn ? checkOut : null,
+                    child: Text("Check-out", style: TextStyle(fontSize: 20)),
                   ),
                 ],
+              ),
+              SizedBox(height: 40),
+              FutureBuilder<List<Ponto>>(
+                future: Database.getPontosByEmployeeId(widget.employee.id),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return Text("Carregando...");
+                  final pontos = snapshot.data!;
+                  final horasHoje = horasTrabalhadasPorDia(
+                    pontos,
+                    DateTime.now(),
+                  );
+                  return Text("Horas trabalhadas hoje: $horasHoje");
+                },
+              ),
+              SizedBox(height: 10),
+              FutureBuilder<List<Ponto>>(
+                future: Database.getPontosByEmployeeId(widget.employee.id),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return Text("Carregando...");
+                  final pontos = snapshot.data!;
+                  final horasMes = calcularHorasTrabalhadasPorMes(pontos);
+                  return Text("Horas trabalhadas no mês: $horasMes");
+                },
               ),
             ],
           ),
