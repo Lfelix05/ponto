@@ -1,4 +1,5 @@
 import 'package:ponto/ponto.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 //calcula as horas trabalhadas no mês
   double calcularHorasTrabalhadasPorMes(List<Ponto> pontos) {
@@ -30,4 +31,10 @@ import 'package:ponto/ponto.dart';
       }
       return total;
     });
+  }
+
+  // Método para limpar dados locais (ex: ao fazer logout)
+  void clearLocalData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
   }
