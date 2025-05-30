@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';  // para criptografar a senha
 class Employee {
   final String id;
   final String name;
@@ -12,7 +14,7 @@ class Employee {
         'id': id,
         'name': name,
         'phone': phone,
-        'password': password,
+        'password': hashedPassword,
         'selected': selected
       };
 
@@ -25,4 +27,8 @@ class Employee {
     selected: json['selected'] ?? false,
   );
 }
+  String get hashedPassword {
+    final bytes = utf8.encode(password);      // Converte a senha para bytes
+    return sha256.convert(bytes).toString();  // Retorna o hash SHA-256
+  }
 }

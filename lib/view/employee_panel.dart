@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import '../utils/notifications.dart';
 import '/employee.dart';
 import '../database.dart';
 import '../ponto.dart';
 import '../utils/Geo-Check.dart';
 import '../utils/hours.dart';
+import 'home.dart';
 
 class EmployeePanel extends StatefulWidget {
   final Employee employee;
@@ -64,6 +64,8 @@ class _EmployeePanelState extends State<EmployeePanel> {
       );
       _hasCheckedIn = true;
     });
+    // Notificação local
+  await showNotification('Check-in realizado', 'Seu ponto foi registrado com sucesso!');
 
     ScaffoldMessenger.of(
       context,
@@ -101,20 +103,16 @@ class _EmployeePanelState extends State<EmployeePanel> {
         _hasCheckedIn = false;
       });
 
+      await showNotification('Check-out realizado', 'Saída registrada com sucesso!');
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Check-out realizado com sucesso! Localização: $location',
+            'Check-out realizado com sucesso!',
           ),
         ),
       );
     }
-  }
-
-  // Método para limpar dados locais (ex: ao fazer logout)
-  void _clearLocalData() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
   }
 
   @override
@@ -157,8 +155,10 @@ class _EmployeePanelState extends State<EmployeePanel> {
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
-              _clearLocalData(); // Limpa dados locais ao sair
-              Navigator.pop(context);
+              clearLocalData(); // Limpa dados locais ao sair
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomePage()),);
             },
           ),
         ],

@@ -37,11 +37,11 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                child: Text('Sou Funcionário', style: TextStyle(fontSize: 16)),
+                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                child: Text('Sou Funcionário', style: TextStyle(fontSize: 20)),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 15),
             ElevatedButton(
               onPressed: () {
                 // Navegar para tela de login do admin
@@ -58,10 +58,10 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                padding: EdgeInsets.symmetric(horizontal: 35, vertical: 20),
                 child: Text(
                   'Sou Administrador',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 20),
                 ),
               ),
             ),
