@@ -77,6 +77,16 @@ class _AdminPanelState extends State<AdminPanel> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                  textStyle: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ), 
+                ),
                 child: Text("Fechar"),
               ),
             ],
@@ -578,10 +588,17 @@ class _AdminPanelState extends State<AdminPanel> {
                                               ),
                                               actions: [
                                                 TextButton(
-                                                  onPressed:
-                                                      () => Navigator.pop(
-                                                        context,
-                                                      ),
+                                                  onPressed: () => Navigator.pop(context),
+                                                  style: TextButton.styleFrom(
+                                                    padding: EdgeInsets.symmetric(
+                                                      horizontal: 32,
+                                                      vertical: 16,
+                                                    ),
+                                                    textStyle: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.bold,
+                                                    ), 
+                                                  ),
                                                   child: Text("Fechar"),
                                                 ),
                                               ],

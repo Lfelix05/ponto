@@ -155,6 +155,16 @@ class _EmployeePanelState extends State<EmployeePanel> {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                            textStyle: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ), 
+                          ),
                           child: Text("Fechar"),
                         ),
                       ],
