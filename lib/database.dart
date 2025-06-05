@@ -29,6 +29,7 @@ class Database {
       phone: '',
       password: password,
       selected: false,
+      checkIn_Time: '',
     );
     employees.add(employee); // Adiciona o funcionário à lista de funcionários
   }
@@ -102,5 +103,12 @@ class Database {
         .collection('employees')
         .doc(employeeId)
         .update({'selected': false});
+  }
+
+  static Future<void> setCheckInTime(String employeeId, String checkInTime) async {
+    await FirebaseFirestore.instance
+        .collection('employees')
+        .doc(employeeId)
+        .update({'check_In_time': checkInTime});
   }
 }

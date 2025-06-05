@@ -69,60 +69,118 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 195, 230, 255),
       appBar: AppBar(title: Text('Cadastro de Administrador')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Preencha os dados para se cadastrar',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                SizedBox(height: 32),
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(labelText: 'Nome',
-                prefixIcon: Icon(Icons.person)),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, insira seu nome';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email',
-                prefixIcon: Icon(Icons.email)),
-                keyboardType: TextInputType.emailAddress,
-                validator: isAvalidEmail.validate,
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Senha',
-                prefixIcon: Icon(Icons.lock)),
-                obscureText: true,
-                validator: isAvalidPassword.validate,
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _confirmPasswordController,
-                decoration: InputDecoration(labelText: 'Confirmar Senha',
-                prefixIcon: Icon(Icons.lock)),
-                validator: (value) => confirmPassword.validate(
-                  value ?? '',
-                  _passwordController.text,
+      body: Center(
+        child: SingleChildScrollView(
+          child: Card(
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            margin: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.admin_panel_settings,
+                      size: 60,
+                      color: Colors.blue[700],
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'Cadastro de Administrador',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue[900],
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    // Comentário: instrução curta
+                    Text(
+                      'Preencha os dados para se cadastrar',
+                      style: TextStyle(fontSize: 15, color: Colors.grey[700]),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 32),
+                    // Comentário: campo nome
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        labelText: 'Nome',
+                        prefixIcon: Icon(
+                          Icons.person,
+                          color: Color(0xFF23608D),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, insira seu nome';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    // Comentário: campo email
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        prefixIcon: Icon(Icons.email, color: Color(0xFF23608D)),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: isAvalidEmail.validate,
+                    ),
+                    SizedBox(height: 16),
+                    // Comentário: campo senha
+                    TextFormField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        labelText: 'Senha',
+                        prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),
+                      ),
+                      obscureText: true,
+                      validator: isAvalidPassword.validate,
+                    ),
+                    SizedBox(height: 16),
+                    // Comentário: campo confirmar senha
+                    TextFormField(
+                      controller: _confirmPasswordController,
+                      decoration: InputDecoration(
+                        labelText: 'Confirmar Senha',
+                        prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),
+                      ),
+                      validator:
+                          (value) => confirmPassword.validate(
+                            value ?? '',
+                            _passwordController.text,
+                          ),
+                      obscureText: true,
+                    ),
+                    SizedBox(height: 24),
+                    // Comentário: botão cadastrar
+                    ElevatedButton(
+                      onPressed: _register,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(double.infinity, 48),
+                        backgroundColor: Colors.blue[800],
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 4,
+                      ),
+                      child: Text('Cadastrar', style: TextStyle(fontSize: 18)),
+                    ),
+                  ],
                 ),
-                obscureText: true,
               ),
-              SizedBox(height: 20),
-              ElevatedButton(onPressed: _register, child: Text('Cadastrar')),
-            
-              
-                ],
+            ),
           ),
         ),
       ),

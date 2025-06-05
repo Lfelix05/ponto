@@ -97,6 +97,7 @@ class _AdminPanelState extends State<AdminPanel> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 195, 230, 255),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text("Painel Administrativo"),
@@ -145,14 +146,19 @@ class _AdminPanelState extends State<AdminPanel> {
       ),
       body: Column(
         children: [
-          Padding(                   // Campo de busca para filtrar funcionários
+          Padding(
+            // Campo de busca para filtrar funcionários
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
                 labelText: 'Buscar funcionário por nome ou telefone',
                 prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                fillColor: Color.fromARGB(255, 255, 255, 255),
+                filled: true,
               ),
             ),
           ),
@@ -185,6 +191,7 @@ class _AdminPanelState extends State<AdminPanel> {
                     }).toList();
 
                 return ListView.builder(
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                   itemCount: filteredEmployees.length,
                   itemBuilder: (context, index) {
                     final employee = filteredEmployees[index];
@@ -198,197 +205,401 @@ class _AdminPanelState extends State<AdminPanel> {
                               .orderBy('checkIn', descending: false)
                               .snapshots(),
                       builder: (context, pontosSnapshot) {
-                        if (pontosSnapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return ListTile(
-                            title: Text(employee.name),
-                            subtitle: Text("Carregando dados de ponto..."),
-                          );
-                        }
-                        if (pontosSnapshot.hasError ||
-                            !pontosSnapshot.hasData) {
-                          return ListTile(
-                            title: Text(employee.name),
-                            subtitle: Text("Erro ao carregar dados de ponto"),
-                          );
-                        }
-
                         final pontos =
-                            pontosSnapshot.data!.docs
-                                .map(
-                                  (doc) => Ponto.fromJson(
-                                    doc.data() as Map<String, dynamic>,
-                                  ),
-                                )
-                                .toList();
+                            pontosSnapshot.hasData
+                                ? pontosSnapshot.data!.docs
+                                    .map(
+                                      (doc) => Ponto.fromJson(
+                                        doc.data() as Map<String, dynamic>,
+                                      ),
+                                    )
+                                    .toList()
+                                : <Ponto>[];
                         final horasTrabalhadas = calcularHorasTrabalhadasPorMes(
                           pontos,
                         );
-                        // Exibe os dados do funcionário e seus pontos
-                        return ListTile(
-                          contentPadding: EdgeInsets.all(10),
-                          title: Text(
-                            "${employee.name} - ${employee.phone}",
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                        return Card(
+                          color: Colors.white,
+                          elevation: 4,
+                          margin: EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 2,
                           ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Última Entrada: ${pontos.isNotEmpty ? DateFormat('MM/dd/yyyy HH:mm').format(pontos.last.checkIn) : 'Sem registro'}",
-                              ),
-                              Text(
-                                "Última Saída: ${pontos.isNotEmpty && pontos.last.checkOut != null ? DateFormat('MM/dd/yyyy HH:mm').format(pontos.last.checkOut!) : 'Ainda trabalhando'}",
-                              ),
-                              Text(
-                                "Horas trabalhadas hoje: ${horasTrabalhadasPorDia(pontos, DateTime.now()).toStringAsFixed(2)}",
-                              ),
-                              Text(
-                                "Horas trabalhadas no mês: ${horasTrabalhadas.toStringAsFixed(2)}",
-                              ),
-                            ],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.map, color: Colors.blue),
-                                onPressed: () {
-                                  if (pontos.isNotEmpty &&
-                                      pontos.last.location
-                                          .toString()
-                                          .trim()
-                                          .isNotEmpty &&
-                                      pontos.last.location.toString().contains(
-                                        ',',
-                                      )) {
-                                    try {
-                                      final location =
-                                          pontos.last.location.toString();
-                                      final latLng =
-                                          location
-                                              .split(',')
-                                              .map(
-                                                (e) =>
-                                                    double.tryParse(e.trim()) ??
-                                                    0.0,
-                                              )
-                                              .toList();
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        employee.name,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
+                                          color: Colors.blue[900],
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.map,
+                                        color: Colors.blue[400],
+                                      ),
+                                      tooltip: "Ver localização",
+                                      onPressed: () {
+                                        if (pontos.isNotEmpty &&
+                                            pontos.last.location
+                                                .toString()
+                                                .trim()
+                                                .isNotEmpty &&
+                                            pontos.last.location
+                                                .toString()
+                                                .contains(',')) {
+                                          try {
+                                            final location =
+                                                pontos.last.location.toString();
+                                            final latLng =
+                                                location
+                                                    .split(',')
+                                                    .map(
+                                                      (e) =>
+                                                          double.tryParse(
+                                                            e.trim(),
+                                                          ) ??
+                                                          0.0,
+                                                    )
+                                                    .toList();
 
-                                      if (latLng.length == 2 &&
-                                          latLng[0] != 0.0 &&
-                                          latLng[1] != 0.0) {
-                                        //exibe o Google Map com a localização do funcionário
+                                            if (latLng.length == 2 &&
+                                                latLng[0] != 0.0 &&
+                                                latLng[1] != 0.0) {
+                                              //exibe o Google Map com a localização do funcionário
+                                              showDialog(
+                                                context: context,
+                                                builder:
+                                                    (context) => AlertDialog(
+                                                      title: Text(
+                                                        "Localização do Funcionário",
+                                                      ),
+                                                      content: Container(
+                                                        width: double.maxFinite,
+                                                        height: 300,
+                                                        child: GoogleMap(
+                                                          initialCameraPosition:
+                                                              CameraPosition(
+                                                                target: LatLng(
+                                                                  latLng[0],
+                                                                  latLng[1],
+                                                                ),
+                                                                zoom: 15,
+                                                              ),
+                                                          markers: {
+                                                            Marker(
+                                                              markerId: MarkerId(
+                                                                "employee_location",
+                                                              ),
+                                                              position: LatLng(
+                                                                latLng[0],
+                                                                latLng[1],
+                                                              ),
+                                                              infoWindow:
+                                                                  InfoWindow(
+                                                                    title:
+                                                                        "Localização do Funcionário",
+                                                                  ),
+                                                            ),
+                                                          },
+                                                        ),
+                                                      ),
+                                                      actions: [
+                                                        TextButton(
+                                                          onPressed:
+                                                              () =>
+                                                                  Navigator.pop(
+                                                                    context,
+                                                                  ),
+                                                          child: Text("Fechar"),
+                                                        ),
+                                                      ],
+                                                    ),
+                                              );
+                                            } else {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    "Localização inválida",
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          } catch (e) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  "Erro ao processar localização",
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        } else {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                "Localização não disponível",
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.delete,
+                                        color: Colors.red[400],
+                                      ),
+                                      tooltip: "Excluir funcionário",
+                                      onPressed: () {
                                         showDialog(
                                           context: context,
                                           builder:
-                                              (context) => AlertDialog(
-                                                title: Text(
-                                                  "Localização do Funcionário",
-                                                ),
-                                                content: Container(
-                                                  width: double.maxFinite,
-                                                  height: 300,
-                                                  child: GoogleMap(
-                                                    initialCameraPosition:
-                                                        CameraPosition(
-                                                          target: LatLng(
-                                                            latLng[0],
-                                                            latLng[1],
-                                                          ),
-                                                          zoom: 15,
-                                                        ),
-                                                    markers: {
-                                                      Marker(
-                                                        markerId: MarkerId(
-                                                          "employee_location",
-                                                        ),
-                                                        position: LatLng(
-                                                          latLng[0],
-                                                          latLng[1],
-                                                        ),
-                                                        infoWindow: InfoWindow(
-                                                          title:
-                                                              "Localização do Funcionário",
-                                                        ),
-                                                      ),
-                                                    },
-                                                  ),
-                                                ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed:
-                                                        () => Navigator.pop(
-                                                          context,
-                                                        ),
-                                                    child: Text("Fechar"),
-                                                  ),
-                                                ],
+                                              (context) => DeleteEmployeeDialog(
+                                                employeeName: employee.name,
+                                                onRemoveFromList: () async {
+                                                  await Database.removeEmployee(
+                                                    employee.id,
+                                                  );
+                                                  setState(() {
+                                                    _reloadKey++;
+                                                  });
+                                                },
+                                                onConfirm: () async {
+                                                  await Database.deleteEmployee(
+                                                    employee.id,
+                                                  );
+                                                  setState(() {
+                                                    _reloadKey++;
+                                                  });
+                                                },
                                               ),
                                         );
-                                      } else {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              "Localização inválida",
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    } catch (e) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            "Erro ao processar localização",
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          "Localização não disponível",
-                                        ),
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  "Telefone: ${employee.phone}",
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.grey[800],
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.login,
+                                      size: 18,
+                                      color: Colors.blue[300],
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      "Última Entrada: ",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
                                       ),
-                                    );
-                                  }
-                                },
-                              ),
-                              // Botão para excluir o funcionário
-                              IconButton(
-                                icon: Icon(Icons.delete, color: Colors.red),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder:
-                                        (context) => DeleteEmployeeDialog(
-                                          employeeName: employee.name,
-                                          onRemoveFromList: () async {
-                                            await Database.removeEmployee(
-                                              employee.id,
-                                            );
-                                            setState(() {
-                                              _reloadKey++;
-                                            });
-                                          },
-                                          onConfirm: () async {
-                                            await Database.deleteEmployee(
-                                              employee.id,
-                                            );
-                                            setState(() {
-                                              _reloadKey++;
-                                            });
-                                          },
-                                        ),
-                                  );
-                                },
-                              ),
-                            ],
+                                    ),
+                                    Text(
+                                      pontos.isNotEmpty
+                                          ? DateFormat(
+                                            'dd/MM/yyyy HH:mm',
+                                          ).format(pontos.last.checkIn)
+                                          : 'Sem registro',
+                                      style: TextStyle(color: Colors.black87),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.logout,
+                                      size: 18,
+                                      color: Colors.blue[300],
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      "Última Saída: ",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    Text(
+                                      pontos.isNotEmpty &&
+                                              pontos.last.checkOut != null
+                                          ? DateFormat(
+                                            'dd/MM/yyyy HH:mm',
+                                          ).format(pontos.last.checkOut!)
+                                          : 'Ainda trabalhando',
+                                      style: TextStyle(color: Colors.black87),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.access_time,
+                                      size: 18,
+                                      color: Colors.blue[300],
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      "Horas hoje: ",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    Text(
+                                      horasTrabalhadasPorDia(
+                                        pontos,
+                                        DateTime.now(),
+                                      ).toStringAsFixed(2),
+                                      style: TextStyle(color: Colors.black87),
+                                    ),
+                                    SizedBox(width: 16),
+                                    Text(
+                                      "Mês: ",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    Text(
+                                      horasTrabalhadas.toStringAsFixed(2),
+                                      style: TextStyle(color: Colors.black87),
+                                    ),
+                                  ],
+                                ),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton(
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder:
+                                            (context) => AlertDialog(
+                                              title: Text(
+                                                "Informações do Funcionário",
+                                              ),
+                                              content: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    "Nome: ${employee.name}",
+                                                  ),
+                                                  Text(
+                                                    "Telefone: ${employee.phone}",
+                                                  ),
+                                                  Text(
+                                                    "Horas trabalhadas no mês: ${horasTrabalhadas.toStringAsFixed(2)}",
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                        "Defina o horário de entrada: ",
+                                                      ),
+                                                      SizedBox(width: 10),
+                                                      TextButton(
+                                                        onPressed: () async {
+                                                          final picked =
+                                                              await showTimePicker(
+                                                                context:
+                                                                    context,
+                                                                initialTime:
+                                                                    TimeOfDay(
+                                                                      hour: 8,
+                                                                      minute: 0,
+                                                                    ),
+                                                              );
+                                                          if (picked != null) {
+                                                            final formatted =
+                                                                "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
+                                                            await Database.setCheckInTime(
+                                                              employee.id,
+                                                              formatted,
+                                                            );
+                                                            setState(() {
+                                                              formatted;
+                                                            });
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
+                                                            ScaffoldMessenger.of(
+                                                              context,
+                                                            ).showSnackBar(
+                                                              SnackBar(
+                                                                content: Text(
+                                                                  "Horário de entrada definido para $formatted",
+                                                                ),
+                                                              ),
+                                                            );
+                                                          }
+                                                        },
+                                                        child: Text(
+                                                          (employee.checkIn_Time ==
+                                                                      null ||
+                                                                  employee
+                                                                      .checkIn_Time!
+                                                                      .isEmpty)
+                                                              ? '00:00'
+                                                              : employee
+                                                                  .checkIn_Time!,
+                                                          style: TextStyle(
+                                                            color: Colors.blue,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  SizedBox(height: 10),
+                                                ],
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed:
+                                                      () => Navigator.pop(
+                                                        context,
+                                                      ),
+                                                  child: Text("Fechar"),
+                                                ),
+                                              ],
+                                            ),
+                                      );
+                                    },
+                                    child: Text(
+                                      "Detalhes",
+                                      style: TextStyle(
+                                        color: Colors.blue[700],
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },

@@ -67,55 +67,100 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Bem-vindo!',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF23608D),
-                ),
-              ),
-              SizedBox(height: 32),
-              TextFormField(
-                controller: _loginController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: Icon(Icons.email, color: Color(0xFF23608D)),
-                ),
-                validator: isAvalidEmail.validate,
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Senha',
-                  prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),
-                ),
-                obscureText: true,
-                validator: isAvalidPassword.validate,
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(onPressed: _login, child: Text('Entrar')),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AdminRegisterScreen(),
+      backgroundColor: const Color.fromARGB(255, 195, 230, 255),
+      appBar: AppBar(title: Text('Login Administrador')),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Card(
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            margin: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Ícone grande para reforçar o contexto
+                    Icon(
+                      Icons.admin_panel_settings,
+                      size: 60,
+                      color: Colors.blue[700],
                     ),
-                  );
-                },
-                child: Text('Não tem conta? Cadastre-se'),
+                    SizedBox(height: 16),
+                    // Título
+                    Text(
+                      'Bem-vindo!',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue[900],
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    // Subtítulo
+                    Text(
+                      'Acesse sua conta de administrador',
+                      style: TextStyle(fontSize: 15, color: Colors.grey[700]),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 32),
+                    // Campo de email
+                    TextFormField(
+                      controller: _loginController,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        prefixIcon: Icon(Icons.email, color: Color(0xFF23608D)),
+                      ),
+                      validator: isAvalidEmail.validate,
+                    ),
+                    SizedBox(height: 16),
+                    // Campo de senha
+                    TextFormField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(
+                        labelText: 'Senha',
+                        prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),
+                      ),
+                      obscureText: true,
+                      validator: isAvalidPassword.validate,
+                    ),
+                    SizedBox(height: 24),
+                    // Botão de login
+                    ElevatedButton(
+                      onPressed: _login,
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(double.infinity, 48),
+                        backgroundColor: Colors.blue[800],
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 4,
+                      ),
+                      child: Text('Entrar', style: TextStyle(fontSize: 18)),
+                    ),
+                    SizedBox(height: 20),
+                    // Botão para cadastro
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AdminRegisterScreen(),
+                          ),
+                        );
+                      },
+                      child: Text('Não tem conta? Cadastre-se'),
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         ),
       ),

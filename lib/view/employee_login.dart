@@ -79,60 +79,89 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 195, 230, 255),
       appBar: AppBar(title: Text('Login Funcionário')),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Bem-vindo!',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF23608D),
-                ),
-              ),
-              SizedBox(height: 32),
-              TextFormField(
-                controller: phoneController,
-                decoration: InputDecoration(
-                  labelText: 'Telefone',
-                  prefixIcon: Icon(Icons.phone, color: Color(0xFF23608D)),
-                ),
-                validator: isAvalidPhone.validate,
-                keyboardType: TextInputType.phone,
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Senha',
-                  prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),
-                ),
-                obscureText: true,
-                validator: isAvalidPassword.validate,
-              ),
-              SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: () => _loginEmployee(context),
-                child: Text('Entrar'),
-              ),
-              SizedBox(height: 20),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EmployeeRegisterScreen(),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Card(
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            margin: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.badge, size: 60, color: Colors.blue[700]),
+                    SizedBox(height: 16),
+                    Text(
+                      'Bem-vindo!',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue[900],
+                      ),
                     ),
-                  );
-                },
-                child: Text('Não tem conta? Cadastre-se'),
+                    SizedBox(height: 8),
+                    Text(
+                      'Acesse sua conta de funcionário',
+                      style: TextStyle(fontSize: 15, color: Colors.grey[700]),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 32),
+                    TextFormField(
+                      controller: phoneController,
+                      decoration: InputDecoration(
+                        labelText: 'Telefone',
+                        prefixIcon: Icon(Icons.phone, color: Color(0xFF23608D)),
+                      ),
+                      validator: isAvalidPhone.validate,
+                      keyboardType: TextInputType.phone,
+                    ),
+                    SizedBox(height: 16),
+                    TextFormField(
+                      controller: passwordController,
+                      decoration: InputDecoration(
+                        labelText: 'Senha',
+                        prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),
+                      ),
+                      obscureText: true,
+                      validator: isAvalidPassword.validate,
+                    ),
+                    SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () => _loginEmployee(context),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(double.infinity, 48),
+                        backgroundColor: Colors.blue[800],
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 4,
+                      ),
+                      child: Text('Entrar', style: TextStyle(fontSize: 18)),
+                    ),
+                    SizedBox(height: 20),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EmployeeRegisterScreen(),
+                          ),
+                        );
+                      },
+                      child: Text('Não tem conta? Cadastre-se'),
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         ),
       ),
