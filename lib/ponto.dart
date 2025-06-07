@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Ponto {
   final String id;
   final String name;
@@ -28,9 +30,16 @@ class Ponto {
       id: json['id'],
       name: json['name'],
       location: (json['location'] ?? '').toString(),
-      checkIn: DateTime.parse(json['checkIn']),
+      checkIn:
+          json['checkIn'] is Timestamp
+              ? (json['checkIn'] as Timestamp).toDate()
+              : DateTime.parse(json['checkIn'].toString()),
       checkOut:
-          json['checkOut'] != null ? DateTime.parse(json['checkOut']) : null,
+          json['checkOut'] != null
+              ? (json['checkOut'] is Timestamp
+                  ? (json['checkOut'] as Timestamp).toDate()
+                  : DateTime.parse(json['checkOut'].toString()))
+              : null,
     );
   }
 }

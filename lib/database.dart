@@ -109,6 +109,6 @@ class Database {
     await FirebaseFirestore.instance
         .collection('employees')
         .doc(employeeId)
-        .update({'check_In_time': checkInTime});
+        .update({'checkIn_Time': checkInTime});
   }
 }

@@ -78,14 +78,11 @@ class _AdminPanelState extends State<AdminPanel> {
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 style: TextButton.styleFrom(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                   textStyle: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                  ), 
+                  ),
                 ),
                 child: Text("Fechar"),
               ),
@@ -535,13 +532,9 @@ class _AdminPanelState extends State<AdminPanel> {
                                                         onPressed: () async {
                                                           final picked =
                                                               await showTimePicker(
-                                                                context:
-                                                                    context,
+                                                                context:context,
                                                                 initialTime:
-                                                                    TimeOfDay(
-                                                                      hour: 8,
-                                                                      minute: 0,
-                                                                    ),
+                                                                    TimeOfDay(hour: 8,minute: 0,),
                                                               );
                                                           if (picked != null) {
                                                             final formatted =
@@ -550,15 +543,20 @@ class _AdminPanelState extends State<AdminPanel> {
                                                               employee.id,
                                                               formatted,
                                                             );
+                                                            // Atualiza o valor em memória buscando do banco
+                                                            final doc =
+                                                                await FirebaseFirestore.instance
+                                                                .collection('employees',)
+                                                                .doc(employee.id,)
+                                                                .get();
+                                                            print(doc.data());
                                                             setState(() {
-                                                              formatted;
+                                                              employee.checkIn_Time =
+                                                                  doc.data()?['checkIn_Time'];
+                                                                  _reloadKey++;
                                                             });
-                                                            Navigator.pop(
-                                                              context,
-                                                            );
-                                                            ScaffoldMessenger.of(
-                                                              context,
-                                                            ).showSnackBar(
+                                                            Navigator.pop(context,);
+                                                            ScaffoldMessenger.of(context,).showSnackBar(
                                                               SnackBar(
                                                                 content: Text(
                                                                   "Horário de entrada definido para $formatted",
@@ -588,16 +586,21 @@ class _AdminPanelState extends State<AdminPanel> {
                                               ),
                                               actions: [
                                                 TextButton(
-                                                  onPressed: () => Navigator.pop(context),
+                                                  onPressed:
+                                                      () => Navigator.pop(
+                                                        context,
+                                                      ),
                                                   style: TextButton.styleFrom(
-                                                    padding: EdgeInsets.symmetric(
-                                                      horizontal: 32,
-                                                      vertical: 16,
-                                                    ),
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                          horizontal: 32,
+                                                          vertical: 16,
+                                                        ),
                                                     textStyle: TextStyle(
                                                       fontSize: 18,
-                                                      fontWeight: FontWeight.bold,
-                                                    ), 
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
                                                   ),
                                                   child: Text("Fechar"),
                                                 ),

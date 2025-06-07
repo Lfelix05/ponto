@@ -1,5 +1,4 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/timezone.dart' as tz;
 import '../database.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -27,12 +26,12 @@ Future<void> showNotification(String title, String body) async {
   );
 }
 
-// Função para agendar notificação de lembrete de check-in
+// Função para agendar ou disparar notificação de ausência/check-in
 Future<void> scheduleCheckInReminder({
   required String employeeId,
   required String? checkInTime,
 }) async {
-  // checkInTime no formato "HH:mm"
+  print('scheduleCheckInReminder chamado para $employeeId em $checkInTime');
   final parts = (checkInTime ?? "08:00").split(':');
   final hour = int.tryParse(parts[0]) ?? 8;
   final minute = int.tryParse(parts[1]) ?? 0;
@@ -40,35 +39,39 @@ Future<void> scheduleCheckInReminder({
   final now = DateTime.now();
   final scheduled = DateTime(now.year, now.month, now.day, hour, minute);
 
-  // Se já passou do horário hoje, não agenda
-  if (now.isAfter(scheduled)) return;
-
-  // Verifique se já fez check-in hoje
   final pontos = await Database.getPontosByEmployeeId(employeeId);
+  print('Pontos encontrados: ${pontos.length}');
   final fezCheckInHoje = pontos.any(
     (p) =>
         p.checkIn.day == now.day &&
         p.checkIn.month == now.month &&
         p.checkIn.year == now.year,
   );
-  if (fezCheckInHoje) return;
+  print('Fez check-in hoje? $fezCheckInHoje');
+  if (fezCheckInHoje) {
+    print('Já fez check-in hoje, não notifica.');
+    return;
+  }
 
-  // Agenda a notificação local
-  await flutterLocalNotificationsPlugin.zonedSchedule(
-    100,
-    'Lembrete de Check-in',
-    'Você ainda não fez o check-in hoje!',
-    tz.TZDateTime.from(scheduled, tz.local),
-    const NotificationDetails(
-      android: AndroidNotificationDetails(
-        'ponto_channel',
-        'Ponto Notificações',
-        channelDescription: 'Notificações do app de ponto',
-        importance: Importance.max,
-        priority: Priority.high,
+  if (now.isAfter(scheduled)) {
+    print('Horário já passou, disparando notificação de ausência!');
+    await flutterLocalNotificationsPlugin.show(
+      100,
+      'Você está ausente!',
+      'Você não fez o check-in no horário programado.',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'ponto_channel',
+          'Ponto Notificações',
+          channelDescription: 'Notificações do app de ponto',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
       ),
-    ),
-    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    matchDateTimeComponents: DateTimeComponents.time,
-  );
+      payload: '',
+    );
+    return;
+  }
+
+  print('Horário ainda não passou, não notifica.');
 }

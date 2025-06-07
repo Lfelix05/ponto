@@ -10,14 +10,64 @@ import 'admin.dart';
 import 'employee.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:workmanager/workmanager.dart';
+import 'utils/notifications.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
+
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    try {
+      await Firebase.initializeApp();
+    } catch (_) {}
+
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    final InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+    final androidPlugin =
+        flutterLocalNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
+    await androidPlugin?.createNotificationChannel(
+      AndroidNotificationChannel(
+        'ponto_channel',
+        'Ponto Notificações',
+        description: 'Notificações do app de ponto',
+        importance: Importance.max,
+      ),
+    );
+
+    final employeeId = inputData?['employeeId'] as String?;
+    final checkInTime = inputData?['checkInTime'] as String?;
+
+    if (employeeId != null) {
+      await scheduleCheckInReminder(
+        employeeId: employeeId,
+        checkInTime: checkInTime,
+      );
+    }
+
+    return Future.value(true);
+  });
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Inicialize o WorkManager para background tasks
+  await Workmanager().initialize(
+    callbackDispatcher,
+    isInDebugMode: false, // Coloque false em produção
+  );
+
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
   final InitializationSettings initializationSettings = InitializationSettings(
@@ -29,19 +79,33 @@ void main() async {
         AndroidFlutterLocalNotificationsPlugin
       >()
       ?.requestNotificationsPermission();
+
+  final androidPlugin =
+      flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+  await androidPlugin?.createNotificationChannel(
+    AndroidNotificationChannel(
+      'ponto_channel',
+      'Ponto Notificações',
+      description: 'Notificações do app de ponto',
+      importance: Importance.max,
+    ),
+  );
+
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  // Método para obter a tela inicial com base no tipo de usuário
+
   Future<Widget> _getInitialScreen() async {
     final prefs = await SharedPreferences.getInstance();
     final userType = prefs.getString('userType');
     final userId = prefs.getString('userId');
 
     if (userType == 'admin' && userId != null) {
-      // Busque os dados do admin no Firestore
       final doc =
           await FirebaseFirestore.instance
               .collection('admins')
@@ -52,7 +116,6 @@ class MyApp extends StatelessWidget {
         return AdminPanel(admin: admin);
       }
     } else if (userType == 'employee' && userId != null) {
-      // Busque os dados do funcionário no Firestore
       final doc =
           await FirebaseFirestore.instance
               .collection('employees')
@@ -63,7 +126,6 @@ class MyApp extends StatelessWidget {
         return EmployeePanel(employee: employee);
       }
     }
-    // Se não estiver logado, vá para a tela inicial
     return const HomePage();
   }
 

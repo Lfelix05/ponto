@@ -8,6 +8,7 @@ import '../ponto.dart';
 import '../utils/Geo-Check.dart';
 import '../utils/hours.dart';
 import 'home.dart';
+import 'package:workmanager/workmanager.dart';
 
 class EmployeePanel extends StatefulWidget {
   final Employee employee;
@@ -20,14 +21,53 @@ class EmployeePanel extends StatefulWidget {
 class _EmployeePanelState extends State<EmployeePanel> {
   Ponto? _currentPonto;
   bool _hasCheckedIn = false;
+  String? _checkInTime;
 
   @override
   void initState() {
     super.initState();
+    _loadEmployee();
     _loadCurrentPonto();
-    scheduleCheckInReminder(
-      employeeId: widget.employee.id,
-      checkInTime: widget.employee.checkIn_Time,
+  }
+
+  void _loadEmployee() async {
+    final doc =
+        await FirebaseFirestore.instance
+            .collection('employees')
+            .doc(widget.employee.id)
+            .get();
+    setState(() {
+      _checkInTime = doc.data()?['checkIn_Time'];
+    });
+
+    // Cancela agendamento anterior e agenda novamente com o novo horário
+    await Workmanager().cancelByUniqueName(
+      "checkin_reminder_${widget.employee.id}_${DateTime.now().day}",
+    );
+    agendarNotificacaoDeAusencia();
+  }
+
+  void agendarNotificacaoDeAusencia() {
+    print('Chamou agendarNotificacaoDeAusencia');
+    final checkInTime = _checkInTime;
+    print('checkInTime: $checkInTime');
+    if (checkInTime == null || !checkInTime.contains(':')) return;
+    final parts = checkInTime.split(':');
+    if (parts.length < 2) return;
+    final hour = int.tryParse(parts[0]) ?? 8;
+    final minute = int.tryParse(parts[1]) ?? 0;
+    final now = DateTime.now();
+    final scheduled = DateTime(now.year, now.month, now.day, hour, minute);
+    final delay = scheduled.difference(now);
+    if (delay.isNegative) return;
+
+    print('Agendando ausência para ${widget.employee.id} às $hour:$minute');
+
+    Workmanager().registerOneOffTask(
+      "checkin_reminder_${widget.employee.id}_${now.day}",
+      "checkinReminderTask",
+      initialDelay: delay,
+      inputData: {'employeeId': widget.employee.id, 'checkInTime': checkInTime},
     );
   }
 
@@ -54,8 +94,8 @@ class _EmployeePanelState extends State<EmployeePanel> {
         .add({
           'id': widget.employee.id,
           'name': widget.employee.name,
-          'location': location, // <-- aqui: nunca salve null! JAMAIS!
-          'checkIn': now.toIso8601String(),
+          'location': location, // <-- NUNCA, JAMAIS deixe salvar null!!!
+          'checkIn': now, // <-- Salve como DateTime, não como string!
           'checkOut': null,
         });
 
@@ -101,9 +141,9 @@ class _EmployeePanelState extends State<EmployeePanel> {
       if (snapshot.docs.isNotEmpty) {
         final docId = snapshot.docs.first.id;
         await pontosRef.doc(docId).update({
-          'checkOut': now.toIso8601String(),
-          'locationCheckOut': location,
-        });
+        'checkOut': now, // Salve como DateTime
+        'locationCheckOut': location,
+      });
       }
 
       setState(() {
@@ -163,7 +203,7 @@ class _EmployeePanelState extends State<EmployeePanel> {
                             textStyle: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                            ), 
+                            ),
                           ),
                           child: Text("Fechar"),
                         ),
@@ -246,7 +286,7 @@ class _EmployeePanelState extends State<EmployeePanel> {
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             Text(
-                              widget.employee.checkIn_Time ?? 'N/A',
+                              _checkInTime ?? 'N/A',
                               style: TextStyle(fontSize: 16),
                             ),
                             SizedBox(height: 4),
