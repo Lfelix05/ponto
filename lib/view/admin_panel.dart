@@ -78,14 +78,11 @@ class _AdminPanelState extends State<AdminPanel> {
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 style: TextButton.styleFrom(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 16,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                   textStyle: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                  ), 
+                  ),
                 ),
                 child: Text("Fechar"),
               ),
@@ -550,8 +547,21 @@ class _AdminPanelState extends State<AdminPanel> {
                                                               employee.id,
                                                               formatted,
                                                             );
+                                                            // Atualiza o valor em memória buscando do banco
+                                                            final doc =
+                                                                await FirebaseFirestore
+                                                                    .instance
+                                                                    .collection(
+                                                                      'employees',
+                                                                    )
+                                                                    .doc(
+                                                                      employee
+                                                                          .id,
+                                                                    )
+                                                                    .get();
                                                             setState(() {
-                                                              formatted;
+                                                              employee.checkIn_Time =
+                                                                  doc.data()?['checkIn_Time'];
                                                             });
                                                             Navigator.pop(
                                                               context,
@@ -588,16 +598,21 @@ class _AdminPanelState extends State<AdminPanel> {
                                               ),
                                               actions: [
                                                 TextButton(
-                                                  onPressed: () => Navigator.pop(context),
+                                                  onPressed:
+                                                      () => Navigator.pop(
+                                                        context,
+                                                      ),
                                                   style: TextButton.styleFrom(
-                                                    padding: EdgeInsets.symmetric(
-                                                      horizontal: 32,
-                                                      vertical: 16,
-                                                    ),
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                          horizontal: 32,
+                                                          vertical: 16,
+                                                        ),
                                                     textStyle: TextStyle(
                                                       fontSize: 18,
-                                                      fontWeight: FontWeight.bold,
-                                                    ), 
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
                                                   ),
                                                   child: Text("Fechar"),
                                                 ),

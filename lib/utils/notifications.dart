@@ -27,7 +27,7 @@ Future<void> showNotification(String title, String body) async {
   );
 }
 
-// Função para agendar notificação de lembrete de check-in
+// Função para agendar ou disparar notificação de ausência/check-in
 Future<void> scheduleCheckInReminder({
   required String employeeId,
   required String? checkInTime,
@@ -40,9 +40,6 @@ Future<void> scheduleCheckInReminder({
   final now = DateTime.now();
   final scheduled = DateTime(now.year, now.month, now.day, hour, minute);
 
-  // Se já passou do horário hoje, não agenda
-  if (now.isAfter(scheduled)) return;
-
   // Verifique se já fez check-in hoje
   final pontos = await Database.getPontosByEmployeeId(employeeId);
   final fezCheckInHoje = pontos.any(
@@ -53,7 +50,27 @@ Future<void> scheduleCheckInReminder({
   );
   if (fezCheckInHoje) return;
 
-  // Agenda a notificação local
+  if (now.isAfter(scheduled)) {
+    // Se já passou do horário e não fez check-in, dispara a notificação imediatamente
+    await flutterLocalNotificationsPlugin.show(
+      100,
+      'Você está ausente!',
+      'Você não fez o check-in no horário programado.',
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'ponto_channel',
+          'Ponto Notificações',
+          channelDescription: 'Notificações do app de ponto',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+      payload: '',
+    );
+    return;
+  }
+
+  // Se ainda não passou do horário, agenda a notificação para o horário programado
   await flutterLocalNotificationsPlugin.zonedSchedule(
     100,
     'Lembrete de Check-in',
