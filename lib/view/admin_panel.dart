@@ -532,13 +532,9 @@ class _AdminPanelState extends State<AdminPanel> {
                                                         onPressed: () async {
                                                           final picked =
                                                               await showTimePicker(
-                                                                context:
-                                                                    context,
+                                                                context:context,
                                                                 initialTime:
-                                                                    TimeOfDay(
-                                                                      hour: 8,
-                                                                      minute: 0,
-                                                                    ),
+                                                                    TimeOfDay(hour: 8,minute: 0,),
                                                               );
                                                           if (picked != null) {
                                                             final formatted =
@@ -549,26 +545,18 @@ class _AdminPanelState extends State<AdminPanel> {
                                                             );
                                                             // Atualiza o valor em memória buscando do banco
                                                             final doc =
-                                                                await FirebaseFirestore
-                                                                    .instance
-                                                                    .collection(
-                                                                      'employees',
-                                                                    )
-                                                                    .doc(
-                                                                      employee
-                                                                          .id,
-                                                                    )
-                                                                    .get();
+                                                                await FirebaseFirestore.instance
+                                                                .collection('employees',)
+                                                                .doc(employee.id,)
+                                                                .get();
+                                                            print(doc.data());
                                                             setState(() {
                                                               employee.checkIn_Time =
                                                                   doc.data()?['checkIn_Time'];
+                                                                  _reloadKey++;
                                                             });
-                                                            Navigator.pop(
-                                                              context,
-                                                            );
-                                                            ScaffoldMessenger.of(
-                                                              context,
-                                                            ).showSnackBar(
+                                                            Navigator.pop(context,);
+                                                            ScaffoldMessenger.of(context,).showSnackBar(
                                                               SnackBar(
                                                                 content: Text(
                                                                   "Horário de entrada definido para $formatted",

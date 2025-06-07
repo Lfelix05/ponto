@@ -6,7 +6,7 @@ class Employee {
   final String phone;
   final String password;
   final bool selected;
-String? checkIn_Time;
+  String? checkIn_Time;
 
   Employee({required this.id, required this.name, required this.phone,required this.password, required this.selected, required this.checkIn_Time});
 
@@ -17,7 +17,7 @@ String? checkIn_Time;
         'phone': phone,
         'password': hashedPassword,
         'selected': selected,
-        'check_In_Time': checkIn_Time,
+        'checkIn_Time': checkIn_Time,
       };
 
   factory Employee.fromJson(Map<String, dynamic> json) {
@@ -27,7 +27,7 @@ String? checkIn_Time;
     phone: json['phone'] ?? '',
     password: json['password'] ?? '',
     selected: json['selected'] ?? false,
-    checkIn_Time: json['check_In_Time'] ?? '',
+    checkIn_Time: json['checkIn_Time'] ?? '',
   );
 }
   String get hashedPassword {

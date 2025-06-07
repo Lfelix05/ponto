@@ -94,8 +94,8 @@ class _EmployeePanelState extends State<EmployeePanel> {
         .add({
           'id': widget.employee.id,
           'name': widget.employee.name,
-          'location': location, // <-- aqui: nunca salve null! JAMAIS!
-          'checkIn': now.toIso8601String(),
+          'location': location, // <-- NUNCA, JAMAIS deixe salvar null!!!
+          'checkIn': now, // <-- Salve como DateTime, não como string!
           'checkOut': null,
         });
 
@@ -141,9 +141,9 @@ class _EmployeePanelState extends State<EmployeePanel> {
       if (snapshot.docs.isNotEmpty) {
         final docId = snapshot.docs.first.id;
         await pontosRef.doc(docId).update({
-          'checkOut': now.toIso8601String(),
-          'locationCheckOut': location,
-        });
+        'checkOut': now, // Salve como DateTime
+        'locationCheckOut': location,
+      });
       }
 
       setState(() {

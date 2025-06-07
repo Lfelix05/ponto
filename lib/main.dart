@@ -16,25 +16,43 @@ import 'utils/notifications.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
+@pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
-    // Inicializa o plugin de notificações no background
+    try {
+      await Firebase.initializeApp();
+    } catch (_) {}
+
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
     final InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
+    final androidPlugin =
+        flutterLocalNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
+    await androidPlugin?.createNotificationChannel(
+      AndroidNotificationChannel(
+        'ponto_channel',
+        'Ponto Notificações',
+        description: 'Notificações do app de ponto',
+        importance: Importance.max,
+      ),
+    );
+
     final employeeId = inputData?['employeeId'] as String?;
     final checkInTime = inputData?['checkInTime'] as String?;
-    print('WorkManager callback disparado!');
-    print('WorkManager executado para $employeeId às $checkInTime');
+
     if (employeeId != null) {
       await scheduleCheckInReminder(
         employeeId: employeeId,
         checkInTime: checkInTime,
       );
     }
+
     return Future.value(true);
   });
 }
@@ -47,7 +65,7 @@ void main() async {
   // Inicialize o WorkManager para background tasks
   await Workmanager().initialize(
     callbackDispatcher,
-    isInDebugMode: true, // Coloque false em produção
+    isInDebugMode: false, // Coloque false em produção
   );
 
   const AndroidInitializationSettings initializationSettingsAndroid =
@@ -61,6 +79,20 @@ void main() async {
         AndroidFlutterLocalNotificationsPlugin
       >()
       ?.requestNotificationsPermission();
+
+  final androidPlugin =
+      flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+  await androidPlugin?.createNotificationChannel(
+    AndroidNotificationChannel(
+      'ponto_channel',
+      'Ponto Notificações',
+      description: 'Notificações do app de ponto',
+      importance: Importance.max,
+    ),
+  );
 
   runApp(const MyApp());
 }
