@@ -1,53 +1,72 @@
 # Ponto
 
-Ponto Eletrônico is a Flutter-based app designed to efficiently manage employee time tracking. It provides features for both administrators and employees, allowing control over work hours, location, and data management directly through the app.
+Ponto Eletrônico is a Flutter-based app for employee time tracking, featuring real-time Firebase integration, geolocation, notifications, and an admin dashboard.
 
 ## Main Features
+
 ### For Employees
-```dart
--Secure Login:               Access the employee dashboard with data validation.
--Time Clocking:              Check-in and check-out with automatic location recording.
--Hours Overview:             Displays check-in and check-out times, as well as hours worked daily and monthly.
--Intuitive Interface:        Simplified dashboard for everyday use.
-```
+- **Secure Login:** Access the employee dashboard with data validation.
+- **Time Clocking:** Check-in and check-out with automatic location recording.
+- **Hours Overview:** View check-in/check-out times and daily/monthly worked hours.
+- **Notifications:** Receive check-in and absence reminders via local notifications.
+- **Intuitive Interface:** Simple dashboard for everyday use.
 
 ### For Administrators
-```dart
--Employee Registration:       Add new employees to the system with name and phone number.
--Employee Management:         View the list of registered employees and their time records.
--Location Display:            View the employee's location at the time of clock-in on an interactive map.
--Work Hours Monitoring:       Track monthly worked hours of each employee.
--Secure Logout:               Logout as the only way to return to the main menu.
-```
+- **Employee Registration:** Add new employees with name and phone number.
+- **Employee Management:** View, search, and remove employees and their records.
+- **Location Display:** See the employee's location at clock-in on an interactive map.
+- **Work Hours Monitoring:** Track monthly worked hours for each employee.
 
-### General Features
-```dart
--Firebase Integration:        Real-time data management using Firebase Firestore.
--Geolocation:                 Records employee location at check-in and check-out.
--Google Maps:                 Displays locations using interactive maps.
--Responsive Design:           Interface adapts to different screen sizes.
-```
-## Technologies Used
-```dart
-->Flutter:                    Cross-platform development framework.
-->Firebase:                   Real-time database and authentication management.
-->Google Maps API:            Map and location display.
-->Geolocator:                 Device location tracking.
-->Shared Preferences:         Local data storage for administrator info.
-```
+### General
+- **Firebase Integration:** Real-time data management with Firestore.
+- **Geolocation:** Location is recorded at check-in and check-out.
+- **Google Maps:** Display locations on interactive maps.
+- **Local Notifications:** Alerts and reminders using device notifications.
+- **Local Persistence:** User data storage with Shared Preferences.
+- **Background Tasks:** Notification scheduling with WorkManager.
+- **Responsive Design:** Interface adapts to different screen sizes.
+- **Secure Logout:** Logout as the only way to return to the main menu.
+
 ---
-### How to Use
+
+## Technologies Used
+
+- **Flutter:** Cross-platform framework.
+- **Firebase (Firestore & Auth):** Real-time database and authentication.
+- **Google Maps API:** Map and location display.
+- **Geolocator:** Device location capture.
+- **Shared Preferences:** Local data storage.
+- **Flutter Local Notifications:** Device notifications.
+- **WorkManager:** Background task execution.
+- **Intl:** Date and time formatting.
+- **Crypto:** Password hashing.
+- **Timezone:** Timezone handling.
+
+---
+
+## How to Use
+
 **Employee:**
-<ol> 
-  <li>Log in using your name and phone number.</li> 
-  <li>Register your check-in and check-out, and track your worked hours.</li> 
-</ol>
+1. Log in using your name and phone number.
+2. Register your time (check-in/check-out) and track your worked hours.
+3. Receive point reminders via notifications.
 
 **Administrator:**
-<ol> 
-  <li>Log in or register as an administrator.</li> 
-  <li>Manage employees, view time records, and track real-time location.</li> 
-</ol>
+1. Log in or register as an administrator.
+2. Manage employees, view time records, and see real-time locations.
+
+---
+
+## Security
+
+- **API keys and sensitive files** such as `google-services.json`, `GoogleService-Info.plist`, and `.env` **must not be versioned**.
+- Passwords are stored as SHA-256 hashes.
+- Location permissions are requested only when needed.
+
+---
 
 ## Target Audience
-This app is ideal for small and medium-sized businesses that want to manage employee time tracking in a digital, practical, and efficient way.
+
+Ideal for small and medium businesses seeking a digital, practical, and efficient time tracking solution.
+
+---
