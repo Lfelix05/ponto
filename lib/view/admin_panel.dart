@@ -522,6 +522,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                                   Text(
                                                     "Horas trabalhadas no mês: ${horasTrabalhadas.toStringAsFixed(2)}",
                                                   ),
+                                                  SizedBox(height: 1),
                                                   Row(
                                                     children: [
                                                       Text(
@@ -581,7 +582,14 @@ class _AdminPanelState extends State<AdminPanel> {
                                                       ),
                                                     ],
                                                   ),
-                                                  SizedBox(height: 10),
+                                                  SizedBox(height: 20),
+                                                  Text("Código de verificação: ${employee.verificationCode ?? 'Não definido'}"),
+                                                  Text("Envie o código para o funcionário para que ele possa redefinir a senha.",
+                                                    style: TextStyle(
+                                                      fontStyle: FontStyle.italic,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                               actions: [

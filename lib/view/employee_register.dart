@@ -47,6 +47,7 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
           password: _passwordController.text,
           selected: false,
           checkIn_Time: '',
+          verificationCode: '',
         );
         final docRef = await FirebaseFirestore.instance
             .collection('employees')
@@ -129,6 +130,9 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Por favor, insira seu nome';
+                        }
+                        if (value.length < 3) {
+                          return 'O nome deve ter pelo menos 3 caracteres';
                         }
                         return null;
                       },

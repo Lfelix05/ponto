@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ponto/view/admin_forgotPass.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../admin.dart';
 import 'admin_panel.dart';
@@ -129,7 +130,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       obscureText: true,
                       validator: isAvalidPassword.validate,
                     ),
-                    SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                    TextButton(onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => AdminForgotPassword()));}, 
+                    child: Text('Esqueci minha senha', style: TextStyle(color: Colors.blue[800], fontSize: 14))),
+                      ],
+                    ),
+                    SizedBox(height: 12),
                     // Botão de login
                     ElevatedButton(
                       onPressed: _login,

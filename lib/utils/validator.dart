@@ -14,6 +14,7 @@ class isAvalidEmail {
     return null;
   }
 }
+
 class isAvalidPhone {
   static String? validate(String? phone) {
     if (phone == null || phone.isEmpty) {
@@ -26,6 +27,7 @@ class isAvalidPhone {
         : null;
   }
 }
+
 class isAvalidPassword {
   static String? validate(String? password) {
     if (password == null || password.isEmpty) {

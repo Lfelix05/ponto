@@ -30,6 +30,7 @@ class Database {
       password: password,
       selected: false,
       checkIn_Time: '',
+      verificationCode: '',
     );
     employees.add(employee); // Adiciona o funcionário à lista de funcionários
   }

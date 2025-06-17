@@ -5,6 +5,7 @@ import 'package:ponto/view/employee_panel.dart';
 import 'package:ponto/view/employee_register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../employee.dart';
+import 'employee_forgotPass.dart';
 
 class EmployeeLogin extends StatefulWidget {
   const EmployeeLogin({super.key});
@@ -132,7 +133,22 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                       obscureText: true,
                       validator: isAvalidPassword.validate,
                     ),
-                    SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EmployeeForgotPassword(),
+                            ),
+                          );
+                        },
+                        child: Text('Esqueci minha senha'),
+                    ),
+                    ]),
+                    SizedBox(height: 12),
                     ElevatedButton(
                       onPressed: () => _loginEmployee(context),
                       style: ElevatedButton.styleFrom(
