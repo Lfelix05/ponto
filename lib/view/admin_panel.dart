@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:ponto/employee.dart';
 import '../database.dart';
 import '../admin.dart';
+import 'admin_login.dart';
 import 'home.dart';
 import '/ponto.dart';
 import 'package:intl/intl.dart';
@@ -143,10 +145,20 @@ class _AdminPanelState extends State<AdminPanel> {
             icon: Icon(Icons.logout),
             onPressed: () async {
               clearLocalData(); // Limpa os dados locais
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => HomePage()),
-              );
+
+              if (kIsWeb) {
+                // Redireciona para a tela de login do administrador na Web
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginScreen()),
+                );
+              } else {
+                // Redireciona para a HomePage em plataformas móveis
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                );
+              }
             },
           ),
         ],
@@ -533,9 +545,13 @@ class _AdminPanelState extends State<AdminPanel> {
                                                         onPressed: () async {
                                                           final picked =
                                                               await showTimePicker(
-                                                                context:context,
+                                                                context:
+                                                                    context,
                                                                 initialTime:
-                                                                    TimeOfDay(hour: 8,minute: 0,),
+                                                                    TimeOfDay(
+                                                                      hour: 8,
+                                                                      minute: 0,
+                                                                    ),
                                                               );
                                                           if (picked != null) {
                                                             final formatted =
@@ -546,18 +562,28 @@ class _AdminPanelState extends State<AdminPanel> {
                                                             );
                                                             // Atualiza o valor em memória buscando do banco
                                                             final doc =
-                                                                await FirebaseFirestore.instance
-                                                                .collection('employees',)
-                                                                .doc(employee.id,)
-                                                                .get();
+                                                                await FirebaseFirestore
+                                                                    .instance
+                                                                    .collection(
+                                                                      'employees',
+                                                                    )
+                                                                    .doc(
+                                                                      employee
+                                                                          .id,
+                                                                    )
+                                                                    .get();
                                                             print(doc.data());
                                                             setState(() {
                                                               employee.checkIn_Time =
                                                                   doc.data()?['checkIn_Time'];
-                                                                  _reloadKey++;
+                                                              _reloadKey++;
                                                             });
-                                                            Navigator.pop(context,);
-                                                            ScaffoldMessenger.of(context,).showSnackBar(
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
+                                                            ScaffoldMessenger.of(
+                                                              context,
+                                                            ).showSnackBar(
                                                               SnackBar(
                                                                 content: Text(
                                                                   "Horário de entrada definido para $formatted",
@@ -583,10 +609,14 @@ class _AdminPanelState extends State<AdminPanel> {
                                                     ],
                                                   ),
                                                   SizedBox(height: 20),
-                                                  Text("Código de verificação: ${employee.verificationCode ?? 'Não definido'}"),
-                                                  Text("Envie o código para o funcionário para que ele possa redefinir a senha.",
+                                                  Text(
+                                                    "Código de verificação: ${employee.verificationCode ?? 'Não definido'}",
+                                                  ),
+                                                  Text(
+                                                    "Envie o código para o funcionário para que ele possa redefinir a senha.",
                                                     style: TextStyle(
-                                                      fontStyle: FontStyle.italic,
+                                                      fontStyle:
+                                                          FontStyle.italic,
                                                       color: Colors.grey[600],
                                                     ),
                                                   ),

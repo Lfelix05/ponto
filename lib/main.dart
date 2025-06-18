@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:ponto/view/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'view/admin_login.dart';
 import 'view/admin_panel.dart';
 import 'view/employee_panel.dart';
 import 'admin.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:workmanager/workmanager.dart';
 import 'utils/notifications.dart';
+import 'package:flutter/foundation.dart'; // Para verificar se está na Web
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -62,11 +64,10 @@ void main() async {
   tz.initializeTimeZones();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // Inicialize o WorkManager para background tasks
-  await Workmanager().initialize(
-    callbackDispatcher,
-    isInDebugMode: false, // Coloque false em produção
-  );
+  // Inicialize o WorkManager apenas para plataformas móveis
+  if (!kIsWeb) {
+    await Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+  }
 
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -101,9 +102,17 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   Future<Widget> _getInitialScreen() async {
+    if (kIsWeb) {
+      // Redireciona diretamente para a tela de login do administrador na Web
+      return const LoginScreen();
+    }
+
+    print('Carregando tela inicial...');
     final prefs = await SharedPreferences.getInstance();
     final userType = prefs.getString('userType');
     final userId = prefs.getString('userId');
+
+    print('userType: $userType, userId: $userId');
 
     if (userType == 'admin' && userId != null) {
       final doc =
@@ -113,6 +122,7 @@ class MyApp extends StatelessWidget {
               .get();
       if (doc.exists) {
         final admin = Admin.fromJson(doc.data()!);
+        print('Admin encontrado: ${admin.name}');
         return AdminPanel(admin: admin);
       }
     } else if (userType == 'employee' && userId != null) {
@@ -123,9 +133,11 @@ class MyApp extends StatelessWidget {
               .get();
       if (doc.exists) {
         final employee = Employee.fromJson(doc.data()!);
+        print('Funcionário encontrado: ${employee.name}');
         return EmployeePanel(employee: employee);
       }
     }
+    print('Redirecionando para HomePage...');
     return const HomePage();
   }
 
@@ -133,7 +145,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'MX Painting INC',
+      title: 'Ponto',
       theme: ThemeData(
         primaryColor: Color(0xFF23608D),
         colorScheme: ColorScheme.fromSeed(

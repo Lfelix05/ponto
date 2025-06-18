@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web; // Adiciona suporte para Web
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -64,5 +61,15 @@ class DefaultFirebaseOptions {
     projectId: 'ponto-43fda',
     storageBucket: 'ponto-43fda.firebasestorage.app',
     iosBundleId: 'com.example.ponto',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: "AIzaSyCwY7G5JmCKUkUqu_DDg9CnukU9CAhTgSo",
+    authDomain: "ponto-43fda.firebaseapp.com",
+    projectId: "ponto-43fda",
+    storageBucket: "ponto-43fda.firebasestorage.app",
+    messagingSenderId: "172642901580",
+    appId: "1:172642901580:web:e5c87d01acedef68d29ee9",
+    measurementId: "G-R7QLBK3SDP",
   );
 }

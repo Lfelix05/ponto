@@ -5,8 +5,10 @@ import 'package:ponto/view/admin_forgotPass.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../admin.dart';
 import 'admin_panel.dart';
+import 'admin_panelWeb.dart';
 import 'admin_register.dart';
 import '../utils/validator.dart';
+import 'package:flutter/foundation.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,11 +18,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>(); // Controle do formulário
-  final _loginController =
-      TextEditingController(); // Controlador para o campo de email
-  final _passwordController =
-      TextEditingController(); // Controlador para o campo de senha
+  final _formKey = GlobalKey<FormState>();
+  final _loginController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
@@ -48,10 +48,19 @@ class _LoginScreenState extends State<LoginScreen> {
           await prefs.setString('userType', 'admin');
           await prefs.setString('userId', admin.id);
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => AdminPanel(admin: admin)),
-          );
+          if (kIsWeb) {
+            // Redireciona diretamente para a tela de painel do administrador na Web
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => AdminPanelWeb(admin: admin)),
+            );
+          } else {
+            // Para dispositivos móveis, redireciona para o painel do administrador
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => AdminPanel(admin: admin)),
+            );
+          }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Admin não encontrado no banco de dados.')),
@@ -69,103 +78,135 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 195, 230, 255),
-      appBar: AppBar(title: Text('Login Administrador')),
+      appBar: AppBar(title: const Text('Login Administrador')),
       body: Center(
         child: SingleChildScrollView(
-          child: Card(
-            elevation: 8,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-            margin: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Ícone grande para reforçar o contexto
-                    Icon(
-                      Icons.admin_panel_settings,
-                      size: 60,
-                      color: Colors.blue[700],
-                    ),
-                    SizedBox(height: 16),
-                    // Título
-                    Text(
-                      'Bem-vindo!',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue[900],
+          child: Container(
+            constraints: const BoxConstraints(
+              maxWidth: 600,
+            ), // Limita a largura máxima para Web
+            padding: const EdgeInsets.all(24),
+            child: Card(
+              elevation: 8,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 36,
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Ícone grande para reforçar o contexto
+                      Icon(
+                        Icons.admin_panel_settings,
+                        size: 60,
+                        color: Colors.blue[700],
                       ),
-                    ),
-                    SizedBox(height: 8),
-                    // Subtítulo
-                    Text(
-                      'Acesse sua conta de administrador',
-                      style: TextStyle(fontSize: 15, color: Colors.grey[700]),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 32),
-                    // Campo de email
-                    TextFormField(
-                      controller: _loginController,
-                      decoration: InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.email, color: Color(0xFF23608D)),
-                      ),
-                      validator: isAvalidEmail.validate,
-                    ),
-                    SizedBox(height: 16),
-                    // Campo de senha
-                    TextFormField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        labelText: 'Senha',
-                        prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),
-                      ),
-                      obscureText: true,
-                      validator: isAvalidPassword.validate,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                    TextButton(onPressed: () {Navigator.push(context, MaterialPageRoute(builder: (context) => AdminForgotPassword()));}, 
-                    child: Text('Esqueci minha senha', style: TextStyle(color: Colors.blue[800], fontSize: 14))),
-                      ],
-                    ),
-                    SizedBox(height: 12),
-                    // Botão de login
-                    ElevatedButton(
-                      onPressed: _login,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(double.infinity, 48),
-                        backgroundColor: Colors.blue[800],
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                      const SizedBox(height: 16),
+                      // Título
+                      Text(
+                        'Bem-vindo!',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[900],
                         ),
-                        elevation: 4,
                       ),
-                      child: Text('Entrar', style: TextStyle(fontSize: 18)),
-                    ),
-                    SizedBox(height: 20),
-                    // Botão para cadastro
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AdminRegisterScreen(),
+                      const SizedBox(height: 8),
+                      // Subtítulo
+                      Text(
+                        'Acesse sua conta de administrador',
+                        style: TextStyle(fontSize: 15, color: Colors.grey[700]),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 32),
+                      // Campo de email
+                      TextFormField(
+                        controller: _loginController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: Icon(
+                            Icons.email,
+                            color: Color(0xFF23608D),
                           ),
-                        );
-                      },
-                      child: Text('Não tem conta? Cadastre-se'),
-                    ),
-                  ],
+                        ),
+                        validator: isAvalidEmail.validate,
+                      ),
+                      const SizedBox(height: 16),
+                      // Campo de senha
+                      TextFormField(
+                        controller: _passwordController,
+                        decoration: const InputDecoration(
+                          labelText: 'Senha',
+                          prefixIcon: Icon(
+                            Icons.lock,
+                            color: Color(0xFF23608D),
+                          ),
+                        ),
+                        obscureText: true,
+                        validator: isAvalidPassword.validate,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AdminForgotPassword(),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              'Esqueci minha senha',
+                              style: TextStyle(
+                                color: Colors.blue,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      // Botão de login
+                      ElevatedButton(
+                        onPressed: _login,
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 48),
+                          backgroundColor: Colors.blue[800],
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 4,
+                        ),
+                        child: const Text(
+                          'Entrar',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      // Botão para cadastro
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AdminRegisterScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text('Não tem conta? Cadastre-se'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
