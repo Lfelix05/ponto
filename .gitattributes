@@ -1,2 +1,12 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+# Não detectar arquivos C++ e Objective-C/Swift para linguagens do repositório
+*.h linguist-detectable=false
+*.cc linguist-detectable=false
+*.cpp linguist-detectable=false
+*.m linguist-detectable=false
+*.swift linguist-detectable=false
+*.mm linguist-detectable=false
+
+# Garantir que arquivos Dart sejam detectados (geralmente não é necessário, mas bom para garantir)
+*.dart linguist-detectable=true
