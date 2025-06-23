@@ -136,18 +136,19 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EmployeeForgotPassword(),
-                            ),
-                          );
-                        },
-                        child: Text('Esqueci minha senha'),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EmployeeForgotPassword(),
+                              ),
+                            );
+                          },
+                          child: Text('Esqueci minha senha'),
+                        ),
+                      ],
                     ),
-                    ]),
                     SizedBox(height: 12),
                     ElevatedButton(
                       onPressed: () => _loginEmployee(context),

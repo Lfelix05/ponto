@@ -141,9 +141,9 @@ class _EmployeePanelState extends State<EmployeePanel> {
       if (snapshot.docs.isNotEmpty) {
         final docId = snapshot.docs.first.id;
         await pontosRef.doc(docId).update({
-        'checkOut': now, // Salve como DateTime
-        'locationCheckOut': location,
-      });
+          'checkOut': now, // Salve como DateTime
+          'locationCheckOut': location,
+        });
       }
 
       setState(() {
@@ -168,257 +168,272 @@ class _EmployeePanelState extends State<EmployeePanel> {
     final statusColor = _hasCheckedIn ? Colors.green : Colors.red;
     final statusText = _hasCheckedIn ? 'Presente' : 'Ausente';
     final statusIcon = _hasCheckedIn ? Icons.check_circle : Icons.cancel;
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 195, 230, 255),
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text('Painel do Funcionário'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.person),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder:
-                    (context) => AlertDialog(
-                      title: Text("Informações do Funcionário"),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Nome: ${widget.employee.name}"),
-                          Text("Telefone: ${widget.employee.phone}"),
-                          SizedBox(height: 20),
-                          Text("ID: ${widget.employee.id}"),
+    return WillPopScope(
+      onWillPop: () async {
+        // Bloqueia o botão "voltar" e exibe uma mensagem
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Use o botão de logout para sair.")),
+        );
+        return false; // Retorna false para impedir que o usuário saia da tela
+      },
+      child: Scaffold(
+        backgroundColor: const Color.fromARGB(255, 195, 230, 255),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: Text('Painel do Funcionário'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.person),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder:
+                      (context) => AlertDialog(
+                        title: Text("Informações do Funcionário"),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Nome: ${widget.employee.name}"),
+                            Text("Telefone: ${widget.employee.phone}"),
+                            SizedBox(height: 20),
+                            Text("ID: ${widget.employee.id}"),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 32,
+                                vertical: 16,
+                              ),
+                              textStyle: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            child: Text("Fechar"),
+                          ),
                         ],
                       ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 16,
-                            ),
-                            textStyle: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          child: Text("Fechar"),
-                        ),
-                      ],
-                    ),
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () {
-              clearLocalData();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => HomePage()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Container(
-            constraints: BoxConstraints(maxWidth: 400),
-            padding: const EdgeInsets.all(20),
-            child: Card(
-              color: Colors.blue[50],
-              elevation: 8,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.access_time, size: 48, color: Colors.blue[300]),
-                    SizedBox(height: 16),
-                    Text(
-                      "Status do Ponto",
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue[900],
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: () {
+                clearLocalData();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                );
+              },
+            ),
+          ],
+        ),
+        body: Center(
+          child: SingleChildScrollView(
+            child: Container(
+              constraints: BoxConstraints(maxWidth: 400),
+              padding: const EdgeInsets.all(20),
+              child: Card(
+                color: Colors.blue[50],
+                elevation: 8,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.access_time,
+                        size: 48,
+                        color: Colors.blue[300],
                       ),
-                    ),
-                    SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(statusIcon, color: statusColor, size: 28),
-                        SizedBox(width: 8),
-                        Text(
-                          statusText,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: statusColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 24),
-                    Card(
-                      color: Colors.white,
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 16,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Entrada programada:",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              _checkInTime ?? 'N/A',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            SizedBox(height: 4),
-                          ],
+                      SizedBox(height: 16),
+                      Text(
+                        "Status do Ponto",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[900],
                         ),
                       ),
-                    ),
-                    SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(vertical: 32),
-                              backgroundColor:
-                                  _hasCheckedIn ? Colors.grey : Colors.green,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              elevation: 8,
-                              textStyle: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            onPressed: _hasCheckedIn ? null : checkIn,
-                            icon: Icon(Icons.login, size: 24),
-                            label: Text(
-                              "Check-in",
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(statusIcon, color: statusColor, size: 28),
+                          SizedBox(width: 8),
+                          Text(
+                            statusText,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: statusColor,
                             ),
                           ),
-                        ),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(vertical: 32),
-                              backgroundColor:
-                                  _hasCheckedIn ? Colors.red : Colors.grey,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              elevation: 8,
-                              textStyle: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            onPressed: _hasCheckedIn ? checkOut : null,
-                            icon: Icon(Icons.logout, size: 24),
-                            label: Text(
-                              "Check-out",
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 15),
-                    Text(
-                      _hasCheckedIn
-                          ? "Check-in realizado às: ${_currentPonto?.checkIn != null ? dateFormat.format(_currentPonto!.checkIn) : 'N/A'}"
-                          : "Check-out realizado às: ${_currentPonto?.checkOut != null ? dateFormat.format(_currentPonto!.checkOut!) : 'N/A'}",
-                      style: TextStyle(fontSize: 14),
-                    ),
-                    SizedBox(height: 32),
-                    FutureBuilder<List<Ponto>>(
-                      future: Database.getPontosByEmployeeId(
-                        widget.employee.id,
+                        ],
                       ),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) return Text("Carregando...");
-                        final pontos = snapshot.data!;
-                        final horasHoje = horasTrabalhadasPorDia(
-                          pontos,
-                          DateTime.now(),
-                        );
-                        final horasMes = calcularHorasTrabalhadasPorMes(pontos);
-                        return Column(
-                          children: [
-                            Card(
-                              color: Colors.blue[100],
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                      SizedBox(height: 24),
+                      Card(
+                        color: Colors.white,
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 16,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Entrada programada:",
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
-                              elevation: 0,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 6,
-                                  horizontal: 10,
+                              Text(
+                                _checkInTime ?? 'N/A',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              SizedBox(height: 4),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(vertical: 32),
+                                backgroundColor:
+                                    _hasCheckedIn ? Colors.grey : Colors.green,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "Horas trabalhadas hoje",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    Text(
-                                      "$horasHoje",
-                                      style: TextStyle(fontSize: 14),
-                                    ),
-                                    SizedBox(height: 10),
-                                    Text(
-                                      "Horas trabalhadas no mês",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      "$horasMes",
-                                      style: TextStyle(fontSize: 14),
-                                    ),
-                                  ],
+                                elevation: 8,
+                                textStyle: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              onPressed: _hasCheckedIn ? null : checkIn,
+                              icon: Icon(Icons.login, size: 24),
+                              label: Text(
+                                "Check-in",
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
+                          ),
+                          SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(vertical: 32),
+                                backgroundColor:
+                                    _hasCheckedIn ? Colors.red : Colors.grey,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                elevation: 8,
+                                textStyle: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              onPressed: _hasCheckedIn ? checkOut : null,
+                              icon: Icon(Icons.logout, size: 24),
+                              label: Text(
+                                "Check-out",
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 15),
+                      Text(
+                        _hasCheckedIn
+                            ? "Check-in realizado às: ${_currentPonto?.checkIn != null ? dateFormat.format(_currentPonto!.checkIn) : 'N/A'}"
+                            : "Check-out realizado às: ${_currentPonto?.checkOut != null ? dateFormat.format(_currentPonto!.checkOut!) : 'N/A'}",
+                        style: TextStyle(fontSize: 14),
+                      ),
+                      SizedBox(height: 32),
+                      FutureBuilder<List<Ponto>>(
+                        future: Database.getPontosByEmployeeId(
+                          widget.employee.id,
+                        ),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) return Text("Carregando...");
+                          final pontos = snapshot.data!;
+                          final horasHoje = horasTrabalhadasPorDia(
+                            pontos,
+                            DateTime.now(),
+                          );
+                          final horasMes = calcularHorasTrabalhadasPorMes(
+                            pontos,
+                          );
+                          return Column(
+                            children: [
+                              Card(
+                                color: Colors.blue[100],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                elevation: 0,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 6,
+                                    horizontal: 10,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        "Horas trabalhadas hoje",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      Text(
+                                        "$horasHoje",
+                                        style: TextStyle(fontSize: 14),
+                                      ),
+                                      SizedBox(height: 10),
+                                      Text(
+                                        "Horas trabalhadas no mês",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        "$horasMes",
+                                        style: TextStyle(fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

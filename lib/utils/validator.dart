@@ -1,4 +1,3 @@
-
 class isAvalidEmail {
   static String? validate(String? email) {
     if (email == null || email.isEmpty) {

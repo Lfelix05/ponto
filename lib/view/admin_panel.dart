@@ -93,6 +93,88 @@ class _AdminPanelState extends State<AdminPanel> {
     );
   }
 
+  void _showDefineScheduleDialog(Employee employee) {
+    final List<String> daysOfWeek = [
+      'Segunda',
+      'Terça',
+      'Quarta',
+      'Quinta',
+      'Sexta',
+      'Sábado',
+      'Domingo',
+    ];
+    final selectedDays = employee.notificationDays ?? [];
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text("Definir Horário e Dias da Semana"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("Defina o horário de entrada:"),
+              const SizedBox(height: 4),
+              TextField(
+                decoration: InputDecoration(
+                  labelText: 'Horário de Entrada (HH:mm)',
+                  hintText: 'Exemplo: 08:00',
+                ),
+                keyboardType: TextInputType.datetime,
+                onChanged: (value) {
+                  employee.checkIn_Time = value;
+                },
+              ),
+              const SizedBox(height: 16),
+              const Text("Selecione os dias da semana:"),
+              Wrap(
+                spacing: 8,
+                children: daysOfWeek.map((day) {
+                  final isSelected = selectedDays.contains(day);
+                  return FilterChip(
+                    label: Text(day),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          selectedDays.add(day);
+                        } else {
+                          selectedDays.remove(day);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancelar"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await FirebaseFirestore.instance
+                    .collection('employees')
+                    .doc(employee.id)
+                    .update({
+                  'checkIn_Time': employee.checkIn_Time,
+                  'notificationDays': selectedDays,
+                });
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Horário e dias atualizados!")),
+                );
+              },
+              child: const Text("Salvar"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -105,7 +187,15 @@ class _AdminPanelState extends State<AdminPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+    onWillPop: () async {
+      // Bloqueia o botão "voltar" e exibe uma mensagem
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Use o botão de logout para sair.")),
+      );
+      return false; // Retorna false para impedir que o usuário saia da tela
+    },
+      child: Scaffold(
       backgroundColor: const Color.fromARGB(255, 195, 230, 255),
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -532,7 +622,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                                     "Telefone: ${employee.phone}",
                                                   ),
                                                   Text(
-                                                    "Horas trabalhadas no mês: ${horasTrabalhadas.toStringAsFixed(2)}",
+                                                    "Horas trabalhadas esse mês: ${horasTrabalhadas.toStringAsFixed(2)}",
                                                   ),
                                                   SizedBox(height: 1),
                                                   Row(
@@ -540,70 +630,15 @@ class _AdminPanelState extends State<AdminPanel> {
                                                       Text(
                                                         "Defina o horário de entrada: ",
                                                       ),
-                                                      SizedBox(width: 10),
                                                       TextButton(
-                                                        onPressed: () async {
-                                                          final picked =
-                                                              await showTimePicker(
-                                                                context:
-                                                                    context,
-                                                                initialTime:
-                                                                    TimeOfDay(
-                                                                      hour: 8,
-                                                                      minute: 0,
-                                                                    ),
-                                                              );
-                                                          if (picked != null) {
-                                                            final formatted =
-                                                                "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
-                                                            await Database.setCheckInTime(
-                                                              employee.id,
-                                                              formatted,
-                                                            );
-                                                            // Atualiza o valor em memória buscando do banco
-                                                            final doc =
-                                                                await FirebaseFirestore
-                                                                    .instance
-                                                                    .collection(
-                                                                      'employees',
-                                                                    )
-                                                                    .doc(
-                                                                      employee
-                                                                          .id,
-                                                                    )
-                                                                    .get();
-                                                            print(doc.data());
-                                                            setState(() {
-                                                              employee.checkIn_Time =
-                                                                  doc.data()?['checkIn_Time'];
-                                                              _reloadKey++;
-                                                            });
-                                                            Navigator.pop(
-                                                              context,
-                                                            );
-                                                            ScaffoldMessenger.of(
-                                                              context,
-                                                            ).showSnackBar(
-                                                              SnackBar(
-                                                                content: Text(
-                                                                  "Horário de entrada definido para $formatted",
-                                                                ),
-                                                              ),
-                                                            );
-                                                          }
+                                                        onPressed: () {
+                                                          _showDefineScheduleDialog(employee);
                                                         },
                                                         child: Text(
-                                                          (employee.checkIn_Time ==
-                                                                      null ||
-                                                                  employee
-                                                                      .checkIn_Time!
-                                                                      .isEmpty)
+                                                          (employee.checkIn_Time == null || employee.checkIn_Time!.isEmpty)
                                                               ? '00:00'
-                                                              : employee
-                                                                  .checkIn_Time!,
-                                                          style: TextStyle(
-                                                            color: Colors.blue,
-                                                          ),
+                                                              : employee.checkIn_Time!,
+                                                          style: TextStyle(color: Colors.blue),
                                                         ),
                                                       ),
                                                     ],
@@ -679,6 +714,7 @@ class _AdminPanelState extends State<AdminPanel> {
         ),
         child: Icon(Icons.add),
       ),
+    )
     );
   }
 }

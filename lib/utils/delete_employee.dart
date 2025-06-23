@@ -59,7 +59,8 @@ class _DeleteEmployeeDialogState extends State<DeleteEmployeeDialog> {
               child: Text("Cancelar"),
             ),
             SizedBox(width: 5),
-            ElevatedButton(                                           //botão para remover da lista
+            ElevatedButton(
+              //botão para remover da lista
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 10),
                 minimumSize: Size(0, 36),
@@ -72,7 +73,8 @@ class _DeleteEmployeeDialogState extends State<DeleteEmployeeDialog> {
               child: Text("Remover da lista"),
             ),
             SizedBox(width: 5),
-            ElevatedButton(                                          //botão para excluir permanentemente
+            ElevatedButton(
+              //botão para excluir permanentemente
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 10),
                 minimumSize: Size(0, 36),

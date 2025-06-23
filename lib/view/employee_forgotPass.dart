@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ponto/utils/validator.dart';
 
 class EmployeeForgotPassword extends StatefulWidget {
   const EmployeeForgotPassword({super.key});
@@ -14,6 +15,7 @@ class _EmployeeForgotPasswordState extends State<EmployeeForgotPassword> {
   final _phoneController = TextEditingController();
   final _codeController = TextEditingController();
   final _senhaController = TextEditingController();
+  final _confirmSenhaController = TextEditingController();
 
   bool _codigoGerado = false;
   bool _codigoValidado = false;
@@ -110,24 +112,30 @@ class _EmployeeForgotPasswordState extends State<EmployeeForgotPassword> {
         );
         return;
       }
+      if (novaSenha != _confirmSenhaController.text.trim()) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('As senhas não coincidem.')),
+        );
+        return;
+      } else {
+        final docId = query.docs.first.id;
 
-      final docId = query.docs.first.id;
+        // Hash da senha usando SHA-256
+        final bytes = utf8.encode(novaSenha);
+        final hashedPassword = sha256.convert(bytes).toString();
 
-      // Hash da senha usando SHA-256
-      final bytes = utf8.encode(novaSenha);
-      final hashedPassword = sha256.convert(bytes).toString();
+        // Atualiza a senha no Firestore
+        await FirebaseFirestore.instance
+            .collection('employees')
+            .doc(docId)
+            .update({'password': hashedPassword});
 
-      // Atualiza a senha no Firestore
-      await FirebaseFirestore.instance
-          .collection('employees')
-          .doc(docId)
-          .update({'password': hashedPassword});
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Senha redefinida com sucesso!')),
+        );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Senha redefinida com sucesso!')),
-      );
-
-      Navigator.pop(context);
+        Navigator.pop(context);
+      }
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -164,8 +172,9 @@ class _EmployeeForgotPasswordState extends State<EmployeeForgotPassword> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 20),
-                      TextField(
+                      TextFormField(
                         controller: _phoneController,
+                        validator: isAvalidPhone.validate,
                         decoration: const InputDecoration(
                           labelText: 'Telefone',
                           border: OutlineInputBorder(),
@@ -174,7 +183,8 @@ class _EmployeeForgotPasswordState extends State<EmployeeForgotPassword> {
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () => _gerarCodigo(_phoneController.text.trim()),
+                        onPressed:
+                            () => _gerarCodigo(_phoneController.text.trim()),
                         child: const Text('Gerar Código'),
                       ),
                     ] else if (!_codigoValidado) ...[
@@ -205,10 +215,21 @@ class _EmployeeForgotPasswordState extends State<EmployeeForgotPassword> {
                         'Digite sua nova senha.',
                         textAlign: TextAlign.center,
                       ),
-                      TextField(
+                      TextFormField(
                         controller: _senhaController,
+                        validator: isAvalidPassword.validate,
                         decoration: const InputDecoration(
                           labelText: 'Nova Senha',
+                          border: OutlineInputBorder(),
+                        ),
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _confirmSenhaController,
+                        validator: isAvalidPassword.validate,
+                        decoration: const InputDecoration(
+                          labelText: 'Confirme a Senha',
                           border: OutlineInputBorder(),
                         ),
                         obscureText: true,
@@ -226,7 +247,7 @@ class _EmployeeForgotPasswordState extends State<EmployeeForgotPassword> {
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

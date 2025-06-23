@@ -1,5 +1,8 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart';
 import '../database.dart';
+import '../employee.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -38,6 +41,20 @@ Future<void> scheduleCheckInReminder({
 
   final now = DateTime.now();
   final scheduled = DateTime(now.year, now.month, now.day, hour, minute);
+
+  final doc = await FirebaseFirestore.instance
+      .collection('employees')
+      .doc(employeeId)
+      .get();
+  final employee = Employee.fromJson(doc.data()!);
+
+  // Verificar se o dia atual está nos dias selecionados
+  final daysOfWeek = employee.notificationDays ?? [];
+  final today = DateFormat('EEEE', 'pt_BR').format(now); // Nome do dia em português
+  if (!daysOfWeek.contains(today)) {
+    print('Hoje ($today) não está nos dias selecionados para notificações.');
+    return;
+  }
 
   final pontos = await Database.getPontosByEmployeeId(employeeId);
   print('Pontos encontrados: ${pontos.length}');

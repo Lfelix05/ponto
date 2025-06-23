@@ -31,4 +31,3 @@ Future<String> getCurrentLocation() async {
 
   return "${position.latitude}, ${position.longitude}";
 }
-
