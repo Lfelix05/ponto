@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:ponto/employee.dart';
+import 'package:ponto/utils/employee_utils.dart';
 import '../database.dart';
 import '../admin.dart';
 import '../utils/hours.dart';
@@ -35,70 +36,6 @@ class _AdminPanelWebState extends State<AdminPanelWeb> {
         context,
       ).showSnackBar(SnackBar(content: Text('Erro ao carregar pontos: $e')));
     }
-  }
-
-  void _showCadastroFuncionarioDialog() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("Adicionar Funcionário"),
-            content: SizedBox(
-              width: 400,
-              height: 500,
-              child: StreamBuilder<QuerySnapshot>(
-                stream:
-                    FirebaseFirestore.instance
-                        .collection('employees')
-                        .where('selected', isEqualTo: false)
-                        .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  final docs = snapshot.data!.docs;
-                  if (docs.isEmpty) {
-                    return const Center(
-                      child: Text("Nenhum funcionário disponível"),
-                    );
-                  }
-                  return ListView.builder(
-                    itemCount: docs.length,
-                    itemBuilder: (context, index) {
-                      final data = docs[index].data() as Map<String, dynamic>;
-                      return ListTile(
-                        title: Text(data['name'] ?? ''),
-                        subtitle: Text(data['phone'] ?? ''),
-                        trailing: ElevatedButton(
-                          child: const Text("Adicionar"),
-                          onPressed: () async {
-                            await FirebaseFirestore.instance
-                                .collection('employees')
-                                .doc(docs[index].id)
-                                .update({
-                                  'selected': true,
-                                  'adminId': widget.admin.id,
-                                });
-                            setState(() {
-                              _reloadKey++; // Atualiza a lista principal ANTES de fechar o diálogo
-                            });
-                            Navigator.pop(context);
-                          },
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Fechar"),
-              ),
-            ],
-          ),
-    );
   }
 
   @override
@@ -165,7 +102,17 @@ class _AdminPanelWebState extends State<AdminPanelWeb> {
         child: FloatingActionButton(
           backgroundColor: const Color.fromARGB(255, 73, 157, 217),
           splashColor: const Color(0xFF23608D),
-          onPressed: _showCadastroFuncionarioDialog,
+          onPressed: () {
+            showCadastroFuncionarioDialog(
+              context: context,
+              adminId: widget.admin.id,
+              onReload: () {
+                setState(() {
+                  _reloadKey++;
+                });
+              },
+            );
+          },
           tooltip: "Adicionar Funcionário",
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
@@ -328,10 +275,8 @@ class _AdminPanelWebState extends State<AdminPanelWeb> {
                                                             "Localização do Funcionário",
                                                           ),
                                                           content: SizedBox(
-                                                            width:
-                                                                double
-                                                                    .maxFinite,
-                                                            height: 300,
+                                                            width: 1200,
+                                                            height: 600,
                                                             child: FlutterMap(
                                                               options: MapOptions(
                                                                 center: LatLng(
@@ -607,62 +552,12 @@ class _AdminPanelWebState extends State<AdminPanelWeb> {
                                                           Text(
                                                             "Defina o horário de entrada: ",
                                                           ),
-                                                          SizedBox(width: 10),
                                                           TextButton(
-                                                            onPressed: () async {
-                                                              final picked =
-                                                                  await showTimePicker(
-                                                                    context:
-                                                                        context,
-                                                                    initialTime:
-                                                                        TimeOfDay(
-                                                                          hour:
-                                                                              8,
-                                                                          minute:
-                                                                              0,
-                                                                        ),
-                                                                  );
-                                                              if (picked !=
-                                                                  null) {
-                                                                final formatted =
-                                                                    "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
-                                                                await Database.setCheckInTime(
-                                                                  employee.id,
-                                                                  formatted,
-                                                                );
-                                                                // Atualiza o valor em memória buscando do banco
-                                                                final doc =
-                                                                    await FirebaseFirestore
-                                                                        .instance
-                                                                        .collection(
-                                                                          'employees',
-                                                                        )
-                                                                        .doc(
-                                                                          employee
-                                                                              .id,
-                                                                        )
-                                                                        .get();
-                                                                print(
-                                                                  doc.data(),
-                                                                );
-                                                                setState(() {
-                                                                  employee.checkIn_Time =
-                                                                      doc.data()?['checkIn_Time'];
-                                                                  _reloadKey++;
-                                                                });
-                                                                Navigator.pop(
-                                                                  context,
-                                                                );
-                                                                ScaffoldMessenger.of(
-                                                                  context,
-                                                                ).showSnackBar(
-                                                                  SnackBar(
-                                                                    content: Text(
-                                                                      "Horário de entrada definido para $formatted",
-                                                                    ),
-                                                                  ),
-                                                                );
-                                                              }
+                                                            onPressed: () {
+                                                              showDefineScheduleDialog(
+                                                                context,
+                                                                employee,
+                                                              );
                                                             },
                                                             child: Text(
                                                               (employee.checkIn_Time ==
