@@ -279,11 +279,13 @@ class _AdminPanelWebState extends State<AdminPanelWeb> {
                                                             height: 600,
                                                             child: FlutterMap(
                                                               options: MapOptions(
-                                                                center: LatLng(
-                                                                  latLng[0]!,
-                                                                  latLng[1]!,
-                                                                ),
-                                                                zoom: 15.0,
+                                                                initialCenter:
+                                                                    LatLng(
+                                                                      latLng[0]!,
+                                                                      latLng[1]!,
+                                                                    ),
+                                                                initialZoom:
+                                                                    15.0,
                                                               ),
                                                               children: [
                                                                 TileLayer(
@@ -306,16 +308,14 @@ class _AdminPanelWebState extends State<AdminPanelWeb> {
                                                                         latLng[0]!,
                                                                         latLng[1]!,
                                                                       ),
-                                                                      builder:
-                                                                          (
-                                                                            ctx,
-                                                                          ) => const Icon(
-                                                                            Icons.location_on,
-                                                                            color:
-                                                                                Colors.red,
-                                                                            size:
-                                                                                40,
-                                                                          ),
+                                                                      child: const Icon(
+                                                                        Icons
+                                                                            .location_on,
+                                                                        color:
+                                                                            Colors.red,
+                                                                        size:
+                                                                            40,
+                                                                      ),
                                                                     ),
                                                                   ],
                                                                 ),

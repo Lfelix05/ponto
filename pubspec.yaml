@@ -2,7 +2,7 @@ name: ponto
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -31,18 +31,21 @@ dependencies:
   shared_preferences: ^2.2.2
   flutter:
     sdk: flutter
-  intl: ^0.20.2
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.19.0
   geolocator: ^14.0.0
-  google_maps_flutter: ^2.12.1
-  google_maps_flutter_web: ^0.5.0
+  google_maps_flutter: ^2.5.0
   cloud_firestore: ^5.6.7
   crypto: ^3.0.6
   firebase_auth: ^5.5.3
   flutter_local_notifications: ^19.2.1
   timezone: 0.10.1
-  workmanager: 0.6.0
-  flutter_map: ^4.0.0
-  latlong2: ^0.8.1
+  workmanager: ^0.7.0
+  flutter_map: ^8.1.1
+  latlong2: ^0.9.1
+  provider: ^6.1.1 # Adicionado para gerenciar o estado de localização
+  url_launcher: ^6.3.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -68,6 +71,7 @@ dependency_overrides:
 # The following section is specific to Flutter packages.
 flutter:
   uses-material-design: true
+  generate: true # Adicionado para gerar arquivos de localização
   assets:
     - assets/
 
@@ -90,6 +94,6 @@ flutter:
   # fonts:
   #   - family: Schyler
   #     fonts:
-  #       
+  #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package

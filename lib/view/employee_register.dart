@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ponto/utils/validator.dart';
 import 'package:ponto/view/employee_login.dart';
 import '../employee.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EmployeeRegisterScreen extends StatefulWidget {
   const EmployeeRegisterScreen({super.key});
@@ -21,9 +22,10 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
       if (_passwordController.text != _confirmPasswordController.text) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('As senhas não coincidem')),
-        );
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.passwordfail)));
         return;
       }
       try {
@@ -35,9 +37,10 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                 .get();
 
         if (query.docs.isNotEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Telefone já cadastrado!')),
-          );
+          final l10n = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.phoneAlreadyRegistered)));
           return;
         }
         final employee = Employee(
@@ -59,12 +62,14 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
           context,
           MaterialPageRoute(builder: (context) => const EmployeeLogin()),
         );
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Funcionário cadastrado com sucesso!')),
-        );
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.registersucces)));
       } catch (e) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao cadastrar usuário: $e')),
+          SnackBar(content: Text(l10n.errorRegisteringUser(e.toString()))),
         );
       }
     }
@@ -79,10 +84,12 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 195, 230, 255),
       appBar: AppBar(
-        title: const Text('Cadastro Funcionário'),
+        title: Text(l10n.employeeregisterTitle),
         centerTitle: true,
         elevation: 0,
       ),
@@ -104,7 +111,7 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                     Icon(Icons.person_add, size: 60, color: Colors.blue[700]),
                     SizedBox(height: 16),
                     Text(
-                      'Cadastro de Funcionário',
+                      l10n.employeeregisterTitle,
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -113,15 +120,15 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Preencha os dados para se cadastrar',
+                      l10n.registerText,
                       style: TextStyle(fontSize: 15, color: Colors.grey[700]),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
                     TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nome Completo',
+                      decoration: InputDecoration(
+                        labelText: l10n.fullName,
                         prefixIcon: Icon(
                           Icons.person,
                           color: Color(0xFF23608D),
@@ -129,10 +136,10 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Por favor, insira seu nome';
+                          return l10n.pleaseEnterName;
                         }
                         if (value.length < 3) {
-                          return 'O nome deve ter pelo menos 3 caracteres';
+                          return l10n.nameMinLength;
                         }
                         return null;
                       },
@@ -140,8 +147,8 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                     SizedBox(height: 16),
                     TextFormField(
                       controller: _phoneController,
-                      decoration: const InputDecoration(
-                        labelText: 'Telefone',
+                      decoration: InputDecoration(
+                        labelText: l10n.phone,
                         prefixIcon: Icon(Icons.phone, color: Color(0xFF23608D)),
                       ),
                       keyboardType: TextInputType.phone,
@@ -150,8 +157,8 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                     SizedBox(height: 16),
                     TextFormField(
                       controller: _passwordController,
-                      decoration: const InputDecoration(
-                        labelText: 'Senha',
+                      decoration: InputDecoration(
+                        labelText: l10n.password,
                         prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),
                       ),
                       obscureText: true,
@@ -160,8 +167,8 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                     SizedBox(height: 16),
                     TextFormField(
                       controller: _confirmPasswordController,
-                      decoration: const InputDecoration(
-                        labelText: 'Confirmar Senha',
+                      decoration: InputDecoration(
+                        labelText: l10n.confirmPassword,
                         prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),
                       ),
                       obscureText: true,
@@ -183,7 +190,10 @@ class _EmployeeRegisterScreen extends State<EmployeeRegisterScreen> {
                         ),
                         elevation: 4,
                       ),
-                      child: Text('Cadastrar', style: TextStyle(fontSize: 18)),
+                      child: Text(
+                        l10n.register,
+                        style: TextStyle(fontSize: 18),
+                      ),
                     ),
                   ],
                 ),

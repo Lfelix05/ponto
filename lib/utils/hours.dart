@@ -17,6 +17,25 @@ double calcularHorasTrabalhadasPorMes(List<Ponto> pontos) {
   });
 }
 
+//calcula as horas trabalhadas no mês anterior
+double calcularHorasTrabalhadasMesAnterior(List<Ponto> pontos) {
+  final now = DateTime.now();
+  final mesAnterior = now.month == 1 ? 12 : now.month - 1;
+  final anoMesAnterior = now.month == 1 ? now.year - 1 : now.year;
+
+  final pontosDoMesAnterior = pontos.where(
+    (p) => p.checkIn.month == mesAnterior && p.checkIn.year == anoMesAnterior,
+  );
+  //soma as horas trabalhadas no mês anterior
+  return pontosDoMesAnterior.fold(0.0, (total, ponto) {
+    if (ponto.checkOut != null) {
+      final duracao = ponto.checkOut!.difference(ponto.checkIn).inHours;
+      return total + duracao;
+    }
+    return total;
+  });
+}
+
 //calcula as horas trabalhadas por dia
 double horasTrabalhadasPorDia(List<Ponto> pontos, DateTime dia) {
   final pontosDoDia = pontos.where(

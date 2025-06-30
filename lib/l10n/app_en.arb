@@ -1,0 +1,351 @@
+{
+  "appTitle": "Time Tracker",
+  
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  
+  "notificationsChannelDescription": "Time tracker app notifications",
+  "@notificationsChannelDescription": {
+    "description": "Description of the notifications channel"
+  },
+  
+  "youAreAbsent": "You are absent!",
+  "@youAreAbsent": {
+    "description": "Absence notification title"
+  },
+  
+  "noCheckInScheduledTime": "You did not check-in at the scheduled time.",
+  "@noCheckInScheduledTime": {
+    "description": "Absence message in notification"
+  },
+  
+  "loginTitle": "Welcome!",
+  "selectlogin": "Select your type of login to continue:",
+  "employeeLoginSubtitle": "I'm an Employee",
+  "adminLoginSubtitle": "I'm an Admin",
+  "adminloginTitle": "Admin Login",
+  "adminregisterTitle": "Admin Register",
+  "employeeloginTitle": "Employee Login",
+  "employeeregisterTitle": "Employee Register",
+  "resetpassword": "Reset Password",
+
+  "logintext": "Fill in the fields to login:",
+  "registerText": "Fill in the fields to register:",
+  "pleaseEnterName": "Please enter your name",
+  "nameMinLength": "Name must have at least 3 characters",
+  "phoneAlreadyRegistered": "Phone already registered!",
+  "name": "Name",
+  "fullName": "Full Name",
+  "phone": "Phone",
+  "email": "Email",
+  "password": "Password",
+  "confirmPassword": "Confirm Password",
+  "forgotPassword": "Forgot my password",
+  "login": "Login",
+  "register": "Register",
+  "noAccount": "Don't have an account? Register",
+  
+  "pleaseEnterEmail": "Please enter your email",
+  "enterValidEmail": "Enter a valid email",
+  "pleaseEnterPhone": "Please enter your phone number",
+  "enterValidPhone": "Enter a valid phone number",
+  "pleaseEnterPassword": "Please enter your password",
+  "passwordMinLength": "Password must be at least 6 characters long",
+  "pleaseConfirmPassword": "Please confirm your password",
+
+  "passwordfail": "Password do not match",
+  "registersucces": "Successful register!",
+  "errorRegisteringUser": "Error registering user: {error}",
+  "@errorRegisteringUser": {
+    "description": "Error message when registering a user fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "loginError": "Error logging in, password or username not found!",
+  "employeeNotFound": "Employee not found.",
+  "incorrectPassword": "Incorrect password.",
+  "phoneNumberNotFound": "Phone number not found.",
+  "verificationCodeGenerated": "Verification code generated!",
+  "codeValidatedSuccessfully": "Code validated successfully!",
+  "invalidCode": "Invalid code.",
+  "passwordResetSuccess": "Password reset successfully!",
+  "enterPhoneForVerificationCode": "Enter your phone number to receive a verification code.",
+  "generateCode": "Generate Code",
+  "enterVerificationCodeFromAdmin": "Enter the verification code, request it from the administrator.",
+  "verificationCodeLabel": "Verification Code",
+  "validateCode": "Validate Code",
+  "enterNewPassword": "Enter your new password.",
+  "newPassword": "New Password",
+  
+  "errorMessage": "Error: {message}",
+  "@errorMessage": {
+    "description": "Format for displaying an error message",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  
+  "errorGeneratingCode": "Error generating code: {error}",
+  "@errorGeneratingCode": {
+    "description": "Error message when generating verification code fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  
+  "errorValidatingCode": "Error validating code: {error}",
+  "@errorValidatingCode": {
+    "description": "Error message when validating code fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  
+  "errorResettingPassword": "Error resetting password: {error}",
+  "@errorResettingPassword": {
+    "description": "Error message when resetting password fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  
+  "employeeDetails": "Employee Information",
+  "adminDetails": "Admin Information",
+  
+  "nameFormat": "Name: {name}",
+  "@nameFormat": {
+    "description": "Format for displaying a person's name",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John Doe"
+      }
+    }
+  },
+  
+  "phoneFormat": "Phone: {phone}",
+  "@phoneFormat": {
+    "description": "Format for displaying a phone number",
+    "placeholders": {
+      "phone": {
+        "type": "String",
+        "example": "+1 123 456 7890"
+      }
+    }
+  },
+  
+  "emailFormat": "Email: {email}",
+  "@emailFormat": {
+    "description": "Format for displaying an email address",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "example@mail.com"
+      }
+    }
+  },
+  
+  "idFormat": "ID: {id}",
+  "@idFormat": {
+    "description": "Format for displaying an ID",
+    "placeholders": {
+      "id": {
+        "type": "String",
+        "example": "12345"
+      }
+    }
+  },
+  
+  "hoursWorkedLastMonth": "Hours worked last month: {hours}",
+  "@hoursWorkedLastMonth": {
+    "description": "Format for displaying hours worked last month",
+    "placeholders": {
+      "hours": {
+        "type": "String",
+        "example": "160.5"
+      }
+    }
+  },
+  
+  "setEntryTime": "Set entry time: ",
+  
+  "verificationCode": "Verification code: {code}",
+  "@verificationCode": {
+    "description": "Format for displaying a verification code",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "123456"
+      }
+    }
+  },
+  
+  "sendCodeInstruction": "Send the code to the employee so they can reset their password.",
+  "close": "Close",
+  
+  "adminPanel": "Admin Panel",
+  "employeePanel": "Employee Panel",
+  "searchEmployee": "Search employee by name or phone",
+  "noEmployeesRegistered": "No employees registered",
+  "loadingEmployees": "Loading employees...",
+  "errorLoadingEmployees": "Error loading employees",
+  "addEmployee": "Add Employee",
+  "addEmployeeTooltip": "Add Employee",
+  "details": "Details",
+  "workedHoursToday": "Hours today: ",
+  "workedHoursMonth": "Month: ",
+  "lastEntry": "Last Entry: ",
+  "lastExit": "Last Exit: ",
+  "stillWorking": "Still working",
+  "noRecord": "No record",
+  
+  "logout": "Logout",
+  "useLogoutButton": "Use the logout button to exit.",
+
+  "languageSettings": "Language Settings",
+  "settings": "Settings",
+  "settingsDescription": "Change application settings",
+  
+  "viewLocation": "View Location",
+  "deleteEmployee": "Delete Employee",
+  "employeeInformation": "Employee Information",
+  "defineEntryTime": "Define entry time",
+  "verificationCodeNotDefined": "Not defined",
+
+  "present": "Present",
+  "absent": "Absent",
+  "checkInStatus": "Check-in Status",
+  "scheduledEntry": "Scheduled Entry Time",
+  "notAvailable": "Not available",
+  "checkIn": "Check In",
+  "checkOut": "Check Out",
+  "checkInDoneAt": "Check-in done at: {time}",
+  "@checkInDoneAt": {
+    "description": "Message showing the time when check-in was done",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "01/01/2023 08:30"
+      }
+    }
+  },
+  "checkOutDoneAt": "Check-out done at: {time}",
+  "@checkOutDoneAt": {
+    "description": "Message showing the time when check-out was done",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "01/01/2023 17:30"
+      }
+    }
+  },
+  "loading": "Loading...",
+  "hoursWorkedToday": "Hours worked today",
+  "hoursWorkedThisMonth": "Hours worked this month",
+  "checkInCompleted": "Check-in Completed",
+  "yourCheckInRegisteredSuccessfully": "Your check-in has been registered successfully",
+  "checkInSuccessful": "Check-in successful!",
+  "checkOutCompleted": "Check-out Completed",
+  "exitRegisteredSuccessfully": "Your exit has been registered successfully",
+  "checkOutSuccessful": "Check-out successful!",
+
+  "emailCannotBeEmpty": "Email cannot be empty.",
+  "resetEmailSent": "Password reset email sent!",
+  "errorSendingEmail": "Error sending email: invalid or unregistered email.",
+  "enterEmailForPasswordReset": "Enter your email to receive password reset instructions.",
+  "send": "Send",
+
+  "removeEmployee": "Remove Employee",
+  "wantToRemoveEmployee": "Do you want to remove {name} from your list or delete permanently?",
+  "@wantToRemoveEmployee": {
+    "description": "Question about removing an employee",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John Doe"
+      }
+    }
+  },
+  "enterNameToDeletePermanently": "Enter the name to delete permanently",
+  "permanentDeleteWarning": "*Delete is permanent and removes all employee data.*",
+  "cancel": "Cancel",
+  "removeFromList": "Remove from list",
+  "delete": "Delete",
+
+  "employeeLocation": "Employee Location",
+  "invalidLocation": "Invalid location",
+  "errorProcessingLocation": "Error processing location: {error}",
+  "@errorProcessingLocation": {
+    "description": "Error message when processing location fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "locationNotAvailable": "Location not available",
+  "defineScheduleAndDays": "Define Schedule and Days of the Week",
+  "defineEntrySchedule": "Define entry time:",
+  "entryTimeHint": "Entry Time (HH:mm)",
+  "entryTimeExample": "Example: 08:00",
+  "selectDaysOfWeek": "Select days of the week:",
+  "monday": "Monday",
+  "tuesday": "Tuesday",
+  "wednesday": "Wednesday",
+  "thursday": "Thursday",
+  "friday": "Friday",
+  "saturday": "Saturday",
+  "sunday": "Sunday",
+  "save": "Save",
+  "scheduleUpdated": "Schedule and days updated!",
+  "addEmployeeTitle": "Add Employee",
+  "noEmployeesAvailable": "No employees available",
+  "add": "Add",
+
+  "locationServiceDisabled": "Location service disabled",
+  "locationPermissionDenied": "Location permission denied",
+  "locationPermissionPermanentlyDenied": "Location permission permanently denied",
+  "userNotFound": "User not found",
+  "invalidEmail": "Invalid email",
+  "userDisabled": "This user has been disabled",
+  "tooManyRequests": "Too many login attempts. Please try again later.",
+  "authError": "Authentication error: {message}",
+  "@authError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "openInGoogleMaps": "Open in Google Maps",
+  "cannotOpenMap": "Could not open the map",
+  "employeeLocation": "Employee Location",
+  "invalidLocation": "Invalid location",
+  "errorProcessingLocation": "Error processing location: {error}",
+  "@errorProcessingLocation": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Invalid format"
+      }
+    }
+  }
+}

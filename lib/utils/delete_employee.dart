@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DeleteEmployeeDialog extends StatefulWidget {
   final String employeeName;
@@ -22,19 +23,18 @@ class _DeleteEmployeeDialogState extends State<DeleteEmployeeDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: Text("Remover Funcionário"),
+      title: Text(l10n.removeEmployee),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            "Você deseja remover ${widget.employeeName} da sua lista ou excluir permanentemente?",
-          ),
+          Text(l10n.wantToRemoveEmployee(widget.employeeName)),
           SizedBox(height: 16),
           TextField(
             controller: _controller,
             decoration: InputDecoration(
-              labelText: "Digite o nome para excluir permanentemente",
+              labelText: l10n.enterNameToDeletePermanently,
               border: OutlineInputBorder(),
             ),
             onChanged: (value) {
@@ -45,7 +45,7 @@ class _DeleteEmployeeDialogState extends State<DeleteEmployeeDialog> {
           ),
           SizedBox(height: 10),
           Text(
-            "*Excluir é permanente e apaga todos os dados do funcionário.*",
+            l10n.permanentDeleteWarning,
             style: TextStyle(color: Colors.red, fontSize: 12),
           ),
         ],
@@ -56,7 +56,7 @@ class _DeleteEmployeeDialogState extends State<DeleteEmployeeDialog> {
           children: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text("Cancelar"),
+              child: Text(l10n.cancel),
             ),
             SizedBox(width: 5),
             ElevatedButton(
@@ -70,7 +70,7 @@ class _DeleteEmployeeDialogState extends State<DeleteEmployeeDialog> {
                 await widget.onRemoveFromList();
                 Navigator.pop(context);
               },
-              child: Text("Remover da lista"),
+              child: Text(l10n.removeFromList),
             ),
             SizedBox(width: 5),
             ElevatedButton(
@@ -87,7 +87,7 @@ class _DeleteEmployeeDialogState extends State<DeleteEmployeeDialog> {
                         Navigator.pop(context);
                       }
                       : null,
-              child: Text("Excluir"),
+              child: Text(l10n.delete),
             ),
           ],
         ),

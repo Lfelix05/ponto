@@ -1,9 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 import 'package:ponto/view/home.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'l10n/localization.dart';
 import 'view/admin_login.dart';
 import 'view/admin_panel.dart';
 import 'view/employee_panel.dart';
@@ -13,6 +17,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:workmanager/workmanager.dart';
 import 'utils/notifications.dart';
+import 'utils/validator.dart';
 import 'package:flutter/foundation.dart'; // Para verificar se está na Web
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -52,6 +57,7 @@ void callbackDispatcher() {
       await scheduleCheckInReminder(
         employeeId: employeeId,
         checkInTime: checkInTime,
+        // Sem contexto aqui, a função usará textos padrão
       );
     }
 
@@ -63,6 +69,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Inicializa as mensagens de validação
+  await ValidatorMessages.initialize();
 
   // Inicialize o WorkManager apenas para plataformas móveis
   if (!kIsWeb) {
@@ -95,7 +104,12 @@ void main() async {
     ),
   );
 
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => LocalizationProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -107,12 +121,9 @@ class MyApp extends StatelessWidget {
       return const LoginScreen();
     }
 
-    print('Carregando tela inicial...');
     final prefs = await SharedPreferences.getInstance();
     final userType = prefs.getString('userType');
     final userId = prefs.getString('userId');
-
-    print('userType: $userType, userId: $userId');
 
     if (userType == 'admin' && userId != null) {
       final doc =
@@ -122,7 +133,6 @@ class MyApp extends StatelessWidget {
               .get();
       if (doc.exists) {
         final admin = Admin.fromJson(doc.data()!);
-        print('Admin encontrado: ${admin.name}');
         return AdminPanel(admin: admin);
       }
     } else if (userType == 'employee' && userId != null) {
@@ -133,16 +143,16 @@ class MyApp extends StatelessWidget {
               .get();
       if (doc.exists) {
         final employee = Employee.fromJson(doc.data()!);
-        print('Funcionário encontrado: ${employee.name}');
         return EmployeePanel(employee: employee);
       }
     }
-    print('Redirecionando para HomePage...');
     return const HomePage();
   }
 
   @override
   Widget build(BuildContext context) {
+    final localizationProvider = Provider.of<LocalizationProvider>(context);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Ponto',
@@ -179,14 +189,26 @@ class MyApp extends StatelessWidget {
         future: _getInitialScreen(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
-          if (snapshot.hasError) {
-            return Center(child: Text('Erro: ${snapshot.error}'));
-          }
-          return snapshot.data ?? Container();
+          return snapshot.data ?? const HomePage();
         },
       ),
+
+      // Configuração da internacionalização
+      locale: localizationProvider.locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt'), // Português
+        Locale('en'), // Inglês
+      ],
     );
   }
 }

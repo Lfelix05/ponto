@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:ponto/view/admin_login.dart';
+import 'package:ponto/l10n/localization.dart';
 import 'employee_login.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -10,9 +13,68 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 195, 230, 255),
       appBar: AppBar(
-        title: Text('Ponto Eletrônico'),
+        title: Text(AppLocalizations.of(context)!.appTitle),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.language, size: 26),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return Consumer<LocalizationProvider>(
+                    builder: (context, provider, child) {
+                      final currentLocale = provider.locale.languageCode;
+
+                      return AlertDialog(
+                        title: Text(
+                          AppLocalizations.of(context)!.languageSettings,
+                        ),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Opção para Português
+                            RadioListTile<String>(
+                              title: Text('Português'),
+                              value: 'pt',
+                              groupValue: currentLocale,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  provider.setLocale(Locale(value));
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+
+                            // Opção para Inglês
+                            RadioListTile<String>(
+                              title: Text('English'),
+                              value: 'en',
+                              groupValue: currentLocale,
+                              onChanged: (value) {
+                                if (value != null) {
+                                  provider.setLocale(Locale(value));
+                                  Navigator.pop(context);
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(AppLocalizations.of(context)!.close),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          ),
+        ],
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -30,7 +92,7 @@ class HomePage extends StatelessWidget {
                   Image.asset('assets/logo.png', height: 100),
                   SizedBox(height: 24),
                   Text(
-                    'Bem-vindo ao sistema de ponto eletrônico!',
+                    AppLocalizations.of(context)!.loginTitle,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -40,7 +102,7 @@ class HomePage extends StatelessWidget {
                   ),
                   SizedBox(height: 48),
                   Text(
-                    'Escolha seu tipo de acesso para continuar.',
+                    AppLocalizations.of(context)!.selectlogin,
                     style: TextStyle(fontSize: 15, color: Colors.grey[700]),
                     textAlign: TextAlign.center,
                   ),
@@ -61,7 +123,7 @@ class HomePage extends StatelessWidget {
                         horizontal: 8,
                       ),
                       child: Text(
-                        'Sou Funcionário',
+                        AppLocalizations.of(context)!.employeeLoginSubtitle,
                         style: TextStyle(fontSize: 20),
                       ),
                     ),
@@ -90,7 +152,7 @@ class HomePage extends StatelessWidget {
                         horizontal: 8,
                       ),
                       child: Text(
-                        'Sou Administrador',
+                        AppLocalizations.of(context)!.adminLoginSubtitle,
                         style: TextStyle(fontSize: 20),
                       ),
                     ),

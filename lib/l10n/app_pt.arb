@@ -1,0 +1,351 @@
+{
+  "appTitle": "Ponto Eletrônico",
+  
+  "@appTitle": {
+    "description": "O título da aplicação"
+  },
+  
+  "notificationsChannelDescription": "Notificações do app de ponto",
+  "@notificationsChannelDescription": {
+    "description": "Descrição do canal de notificações"
+  },
+  
+  "youAreAbsent": "Você está ausente!",
+  "@youAreAbsent": {
+    "description": "Título da notificação de ausência"
+  },
+  
+  "noCheckInScheduledTime": "Você não fez o check-in no horário programado.",
+  "@noCheckInScheduledTime": {
+    "description": "Mensagem de ausência na notificação"
+  },
+  
+  "loginTitle": "Bem-vindo!",
+  "selectlogin": "Escolha seu tipo de acesso para continuar.",
+  "employeeLoginSubtitle": "Sou Funcionário",
+  "adminLoginSubtitle": "Sou Administrador",
+  "adminloginTitle": "Login Administrador",
+  "adminregisterTitle": "Registro Administrador",
+  "employeeloginTitle": "Login Funcionário",
+  "employeeregisterTitle": "Registro Funcionário",
+  "resetpassword": "Redefinir Senha",
+
+  "logintext": "Preencha os campos para efetuar login:",
+  "registerText": "Preencha os campos para se registrar:",
+  "pleaseEnterName": "Por favor, insira seu nome",
+  "nameMinLength": "O nome deve ter pelo menos 3 caracteres",
+  "phoneAlreadyRegistered": "Telefone já cadastrado!",
+  "name": "Nome",
+  "fullName": "Nome Completo",
+  "phone": "Telefone",
+  "email": "Email",
+  "password": "Senha",
+  "confirmPassword": "Confirmar Senha",
+  "forgotPassword": "Esqueci minha senha",
+  "login": "Entrar",
+  "register": "Cadastrar",
+  "noAccount": "Não tem conta? Cadastre-se",
+  
+  "pleaseEnterEmail": "Por favor, digite seu email",
+  "enterValidEmail": "Digite um email válido",
+  "pleaseEnterPhone": "Por favor, digite seu telefone",
+  "enterValidPhone": "Digite um telefone válido",
+  "pleaseEnterPassword": "Por favor, digite sua senha",
+  "passwordMinLength": "A senha deve ter pelo menos 6 caracteres",
+  "pleaseConfirmPassword": "Por favor, confirme sua senha",
+
+  "passwordfail": "As senhas não coincidem",
+  "registersucces": "Cadastrado com sucesso!",
+  "errorRegisteringUser": "Erro ao cadastrar usuário: {error}",
+  "@errorRegisteringUser": {
+    "description": "Mensagem de erro quando o registro de um usuário falha",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Erro de rede"
+      }
+    }
+  },
+  "loginError": "Erro ao efetuar login, senha ou usuário não encontrado!",
+  "employeeNotFound": "Funcionário não encontrado.",
+  "incorrectPassword": "Senha incorreta.",
+  "phoneNumberNotFound": "Número de telefone não encontrado.",
+  "verificationCodeGenerated": "Código de verificação gerado!",
+  "codeValidatedSuccessfully": "Código validado com sucesso!",
+  "invalidCode": "Código inválido.",
+  "passwordResetSuccess": "Senha redefinida com sucesso!",
+  "enterPhoneForVerificationCode": "Digite seu número de telefone para receber um código de verificação.",
+  "generateCode": "Gerar Código",
+  "enterVerificationCodeFromAdmin": "Digite o código de verificação, solicite-o ao administrador.",
+  "verificationCodeLabel": "Código de Verificação",
+  "validateCode": "Validar Código",
+  "enterNewPassword": "Digite sua nova senha.",
+  "newPassword": "Nova Senha",
+  
+  "errorMessage": "Erro: {message}",
+  "@errorMessage": {
+    "description": "Formato para exibir uma mensagem de erro",
+    "placeholders": {
+      "message": {
+        "type": "String",
+        "example": "Erro de rede"
+      }
+    }
+  },
+  
+  "errorGeneratingCode": "Erro ao gerar código: {error}",
+  "@errorGeneratingCode": {
+    "description": "Mensagem de erro quando a geração de código falha",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Erro de rede"
+      }
+    }
+  },
+  
+  "errorValidatingCode": "Erro ao validar código: {error}",
+  "@errorValidatingCode": {
+    "description": "Mensagem de erro quando a validação do código falha",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Erro de rede"
+      }
+    }
+  },
+  
+  "errorResettingPassword": "Erro ao redefinir senha: {error}",
+  "@errorResettingPassword": {
+    "description": "Mensagem de erro quando a redefinição de senha falha",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Erro de rede"
+      }
+    }
+  },
+  
+  "employeeDetails": "Informações do Funcionário",
+  "adminDetails": "Informações do Admin",
+  
+  "nameFormat": "Nome: {name}",
+  "@nameFormat": {
+    "description": "Formato para exibir o nome de uma pessoa",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "João Silva"
+      }
+    }
+  },
+  
+  "phoneFormat": "Telefone: {phone}",
+  "@phoneFormat": {
+    "description": "Formato para exibir um número de telefone",
+    "placeholders": {
+      "phone": {
+        "type": "String",
+        "example": "+55 11 98765-4321"
+      }
+    }
+  },
+  
+  "emailFormat": "Email: {email}",
+  "@emailFormat": {
+    "description": "Formato para exibir um endereço de email",
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "exemplo@email.com"
+      }
+    }
+  },
+  
+  "idFormat": "ID: {id}",
+  "@idFormat": {
+    "description": "Formato para exibir um ID",
+    "placeholders": {
+      "id": {
+        "type": "String",
+        "example": "12345"
+      }
+    }
+  },
+  
+  "hoursWorkedLastMonth": "Horas trabalhadas mês anterior: {hours}",
+  "@hoursWorkedLastMonth": {
+    "description": "Formato para exibir horas trabalhadas no mês anterior",
+    "placeholders": {
+      "hours": {
+        "type": "String",
+        "example": "160,5"
+      }
+    }
+  },
+  
+  "setEntryTime": "Defina o horário de entrada: ",
+  
+  "verificationCode": "Código de verificação: {code}",
+  "@verificationCode": {
+    "description": "Formato para exibir um código de verificação",
+    "placeholders": {
+      "code": {
+        "type": "String",
+        "example": "123456"
+      }
+    }
+  },
+  
+  "sendCodeInstruction": "Envie o código para o funcionário para que ele possa redefinir a senha.",
+  "close": "Fechar",
+  
+  "adminPanel": "Painel Administrativo",
+  "employeePanel": "Painel do Funcionário",
+  "searchEmployee": "Buscar funcionário por nome ou telefone",
+  "noEmployeesRegistered": "Nenhum funcionário cadastrado",
+  "loadingEmployees": "Carregando funcionários...",
+  "errorLoadingEmployees": "Erro ao carregar funcionários",
+  "addEmployee": "Adicionar Funcionário",
+  "addEmployeeTooltip": "Adicionar Funcionário",
+  "details": "Detalhes",
+  "workedHoursToday": "Horas hoje: ",
+  "workedHoursMonth": "Mês: ",
+  "lastEntry": "Última Entrada: ",
+  "lastExit": "Última Saída: ",
+  "stillWorking": "Ainda trabalhando",
+  "noRecord": "Sem registro",
+  
+  "logout": "Sair",
+  "useLogoutButton": "Use o botão de logout para sair.",
+
+  "languageSettings": "Configuração de Idioma",
+  "settings": "Configurações",
+  "settingsDescription": "Altere as configurações do aplicativo",
+  
+  "viewLocation": "Ver localização",
+  "deleteEmployee": "Excluir funcionário",
+  "employeeInformation": "Informações do Funcionário",
+  "defineEntryTime": "Defina o horário de entrada",
+  "verificationCodeNotDefined": "Não definido",
+
+  "present": "Presente",
+  "absent": "Ausente",
+  "checkInStatus": "Status de Registro",
+  "scheduledEntry": "Horário de Entrada Programado",
+  "notAvailable": "Não disponível",
+  "checkIn": "Registrar Entrada",
+  "checkOut": "Registrar Saída",
+  "checkInDoneAt": "Entrada registrada às: {time}",
+  "@checkInDoneAt": {
+    "description": "Mensagem mostrando o horário em que o registro de entrada foi feito",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "01/01/2023 08:30"
+      }
+    }
+  },
+  "checkOutDoneAt": "Saída registrada às: {time}",
+  "@checkOutDoneAt": {
+    "description": "Mensagem mostrando o horário em que o registro de saída foi feito",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "01/01/2023 17:30"
+      }
+    }
+  },
+  "loading": "Carregando...",
+  "hoursWorkedToday": "Horas trabalhadas hoje",
+  "hoursWorkedThisMonth": "Horas trabalhadas este mês",
+  "checkInCompleted": "Entrada Registrada",
+  "yourCheckInRegisteredSuccessfully": "Sua entrada foi registrada com sucesso",
+  "checkInSuccessful": "Entrada registrada com sucesso!",
+  "checkOutCompleted": "Saída Registrada",
+  "exitRegisteredSuccessfully": "Sua saída foi registrada com sucesso",
+  "checkOutSuccessful": "Saída registrada com sucesso!",
+
+  "emailCannotBeEmpty": "O e-mail não pode estar vazio.",
+  "resetEmailSent": "E-mail de redefinição enviado!",
+  "errorSendingEmail": "Erro ao enviar e-mail: e-mail inválido ou não cadastrado.",
+  "enterEmailForPasswordReset": "Digite seu e-mail para receber instruções de redefinição de senha.",
+  "send": "Enviar",
+
+  "removeEmployee": "Remover Funcionário",
+  "wantToRemoveEmployee": "Você deseja remover {name} da sua lista ou excluir permanentemente?",
+  "@wantToRemoveEmployee": {
+    "description": "Pergunta sobre remover um funcionário",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "João Silva"
+      }
+    }
+  },
+  "enterNameToDeletePermanently": "Digite o nome para excluir permanentemente",
+  "permanentDeleteWarning": "*Excluir é permanente e apaga todos os dados do funcionário.*",
+  "cancel": "Cancelar",
+  "removeFromList": "Remover da lista",
+  "delete": "Excluir",
+
+  "employeeLocation": "Localização do Funcionário",
+  "invalidLocation": "Localização inválida",
+  "errorProcessingLocation": "Erro ao processar localização: {error}",
+  "@errorProcessingLocation": {
+    "description": "Mensagem de erro ao processar localização",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Erro de rede"
+      }
+    }
+  },
+  "locationNotAvailable": "Localização não disponível",
+  "defineScheduleAndDays": "Definir Horário e Dias da Semana",
+  "defineEntrySchedule": "Defina o horário de entrada:",
+  "entryTimeHint": "Horário de Entrada (HH:mm)",
+  "entryTimeExample": "Exemplo: 08:00",
+  "selectDaysOfWeek": "Selecione os dias da semana:",
+  "monday": "Segunda",
+  "tuesday": "Terça",
+  "wednesday": "Quarta",
+  "thursday": "Quinta",
+  "friday": "Sexta",
+  "saturday": "Sábado",
+  "sunday": "Domingo",
+  "save": "Salvar",
+  "scheduleUpdated": "Horário e dias atualizados!",
+  "addEmployeeTitle": "Adicionar Funcionário",
+  "noEmployeesAvailable": "Nenhum funcionário disponível",
+  "add": "Adicionar",
+
+  "locationServiceDisabled": "Serviço de localização desativado",
+  "locationPermissionDenied": "Permissão de localização negada",
+  "locationPermissionPermanentlyDenied": "Permissão de localização permanentemente negada",
+  "userNotFound": "Usuário não encontrado",
+  "invalidEmail": "Email inválido",
+  "userDisabled": "Este usuário foi desativado",
+  "tooManyRequests": "Muitas tentativas de login. Tente novamente mais tarde.",
+  "authError": "Erro de autenticação: {message}",
+  "@authError": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "openInGoogleMaps": "Abrir no Google Maps",
+  "cannotOpenMap": "Não foi possível abrir o mapa",
+  "employeeLocation": "Localização do Funcionário",
+  "invalidLocation": "Localização inválida",
+  "errorProcessingLocation": "Erro ao processar localização: {error}",
+  "@errorProcessingLocation": {
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Formato inválido"
+      }
+    }
+  }
+}

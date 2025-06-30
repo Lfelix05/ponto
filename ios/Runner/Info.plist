@@ -49,5 +49,14 @@
 	<string>Precisamos da sua localização para registrar o ponto.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Precisamos da sua localização para registrar o ponto.</string>
+	<key>MinimumOSVersion</key>
+	<string>13.0</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>http</string>
+		<string>tel</string>
+		<string>mailto</string>
+	</array>
 </dict>
 </plist>

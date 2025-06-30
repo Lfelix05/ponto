@@ -6,6 +6,9 @@ import 'package:ponto/view/employee_register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../employee.dart';
 import 'employee_forgotPass.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class EmployeeLogin extends StatefulWidget {
   const EmployeeLogin({super.key});
@@ -34,15 +37,21 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                 .get();
 
         if (query.docs.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Funcionário não encontrado.')),
-          );
+          final l10n = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.employeeNotFound)));
           return;
         }
 
         final data = query.docs.first.data();
-        // Se usar hash, compare o hash da senha digitada com o salvo
-        if (data['password'] == password) {
+
+        // Converter a senha digitada em hash para comparar
+        final bytes = utf8.encode(password);
+        final hashedPassword = sha256.convert(bytes).toString();
+
+        // Comparar os hashes
+        if (data['password'] == hashedPassword) {
           final employee = Employee.fromJson(data);
 
           // Salvar informações no SharedPreferences
@@ -57,14 +66,16 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
             ),
           );
         } else {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Senha incorreta.')));
+          ).showSnackBar(SnackBar(content: Text(l10n.incorrectPassword)));
         }
       } catch (e) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro: $e')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.errorMessage(e.toString()))),
+        );
       }
     }
   }
@@ -79,9 +90,11 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 195, 230, 255),
-      appBar: AppBar(title: Text('Login Funcionário')),
+      appBar: AppBar(title: Text(l10n.employeeloginTitle)),
       body: Center(
         child: SingleChildScrollView(
           child: Card(
@@ -100,7 +113,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                     Icon(Icons.badge, size: 60, color: Colors.blue[700]),
                     SizedBox(height: 16),
                     Text(
-                      'Bem-vindo!',
+                      l10n.loginTitle,
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -109,7 +122,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'Acesse sua conta de funcionário',
+                      l10n.logintext,
                       style: TextStyle(fontSize: 15, color: Colors.grey[700]),
                       textAlign: TextAlign.center,
                     ),
@@ -117,7 +130,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                     TextFormField(
                       controller: phoneController,
                       decoration: InputDecoration(
-                        labelText: 'Telefone',
+                        labelText: l10n.phone,
                         prefixIcon: Icon(Icons.phone, color: Color(0xFF23608D)),
                       ),
                       validator: isAvalidPhone.validate,
@@ -127,7 +140,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                     TextFormField(
                       controller: passwordController,
                       decoration: InputDecoration(
-                        labelText: 'Senha',
+                        labelText: l10n.password,
                         prefixIcon: Icon(Icons.lock, color: Color(0xFF23608D)),
                       ),
                       obscureText: true,
@@ -145,7 +158,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                               ),
                             );
                           },
-                          child: Text('Esqueci minha senha'),
+                          child: Text(l10n.forgotPassword),
                         ),
                       ],
                     ),
@@ -161,7 +174,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                         ),
                         elevation: 4,
                       ),
-                      child: Text('Entrar', style: TextStyle(fontSize: 18)),
+                      child: Text(l10n.login, style: TextStyle(fontSize: 18)),
                     ),
                     SizedBox(height: 20),
                     TextButton(
@@ -173,7 +186,7 @@ class _EmployeeLoginState extends State<EmployeeLogin> {
                           ),
                         );
                       },
-                      child: Text('Não tem conta? Cadastre-se'),
+                      child: Text(l10n.noAccount),
                     ),
                   ],
                 ),

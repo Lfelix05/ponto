@@ -10,6 +10,7 @@ import '/ponto.dart';
 import 'package:intl/intl.dart';
 import '../utils/hours.dart';
 import '../utils/delete_employee.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AdminPanel extends StatefulWidget {
   final Admin admin;
@@ -36,19 +37,21 @@ class _AdminPanelState extends State<AdminPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return WillPopScope(
       onWillPop: () async {
         // Bloqueia o botão "voltar" e exibe uma mensagem
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Use o botão de logout para sair.")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.useLogoutButton)));
         return false; // Retorna false para impedir que o usuário saia da tela
       },
       child: Scaffold(
         backgroundColor: const Color.fromARGB(255, 195, 230, 255),
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: Text("Painel Administrativo"),
+          title: Text(l10n.adminPanel),
           actions: [
             // Botão para exibir informações do admin
             IconButton(
@@ -58,21 +61,21 @@ class _AdminPanelState extends State<AdminPanel> {
                   context: context,
                   builder:
                       (context) => AlertDialog(
-                        title: Text("Informações do Admin"),
+                        title: Text(l10n.adminDetails),
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Nome: ${widget.admin.name}"),
-                            Text("Email: ${widget.admin.email}"),
+                            Text(l10n.nameFormat(widget.admin.name)),
+                            Text(l10n.emailFormat(widget.admin.email)),
                             SizedBox(height: 20),
-                            Text("ID: ${widget.admin.id}"),
+                            Text(l10n.idFormat(widget.admin.id)),
                           ],
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: Text("Fechar"),
+                            child: Text(l10n.close),
                           ),
                         ],
                       ),
@@ -99,7 +102,7 @@ class _AdminPanelState extends State<AdminPanel> {
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
-                  labelText: 'Buscar funcionário por nome ou telefone',
+                  labelText: l10n.searchEmployee,
                   prefixIcon: Icon(Icons.search),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -122,10 +125,10 @@ class _AdminPanelState extends State<AdminPanel> {
                   }
                   if (snapshot.hasError) {
                     print(snapshot.error);
-                    return Center(child: Text("Erro ao carregar funcionários"));
+                    return Center(child: Text(l10n.errorLoadingEmployees));
                   }
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(child: Text("Nenhum funcionário cadastrado"));
+                    return Center(child: Text(l10n.noEmployeesRegistered));
                   }
                   // Lista de funcionários carregada com sucesso
                   final allEmployees = snapshot.data!;
@@ -196,7 +199,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                           Icons.map,
                                           color: Colors.blue[400],
                                         ),
-                                        tooltip: "Ver localização",
+                                        tooltip: l10n.viewLocation,
                                         onPressed: () {
                                           showLocationDialog(context, pontos);
                                         },
@@ -206,7 +209,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                           Icons.delete,
                                           color: Colors.red[400],
                                         ),
-                                        tooltip: "Excluir funcionário",
+                                        tooltip: l10n.deleteEmployee,
                                         onPressed: () {
                                           showDialog(
                                             context: context,
@@ -239,7 +242,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                   ),
                                   SizedBox(height: 4),
                                   Text(
-                                    "Telefone: ${employee.phone}",
+                                    l10n.phoneFormat(employee.phone),
                                     style: TextStyle(
                                       fontSize: 15,
                                       color: Colors.grey[800],
@@ -255,7 +258,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                       ),
                                       SizedBox(width: 4),
                                       Text(
-                                        "Última Entrada: ",
+                                        l10n.lastEntry,
                                         style: TextStyle(
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -265,7 +268,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                             ? DateFormat(
                                               'dd/MM/yyyy HH:mm',
                                             ).format(pontos.last.checkIn)
-                                            : 'Sem registro',
+                                            : l10n.noRecord,
                                         style: TextStyle(color: Colors.black87),
                                       ),
                                     ],
@@ -279,7 +282,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                       ),
                                       SizedBox(width: 4),
                                       Text(
-                                        "Última Saída: ",
+                                        l10n.lastExit,
                                         style: TextStyle(
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -290,7 +293,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                             ? DateFormat(
                                               'dd/MM/yyyy HH:mm',
                                             ).format(pontos.last.checkOut!)
-                                            : 'Ainda trabalhando',
+                                            : l10n.stillWorking,
                                         style: TextStyle(color: Colors.black87),
                                       ),
                                     ],
@@ -305,7 +308,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                       ),
                                       SizedBox(width: 4),
                                       Text(
-                                        "Horas hoje: ",
+                                        l10n.workedHoursToday,
                                         style: TextStyle(
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -319,7 +322,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                       ),
                                       SizedBox(width: 16),
                                       Text(
-                                        "Mês: ",
+                                        l10n.workedHoursMonth,
                                         style: TextStyle(
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -339,7 +342,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                           builder:
                                               (context) => AlertDialog(
                                                 title: Text(
-                                                  "Informações do Funcionário",
+                                                  l10n.employeeInformation,
                                                 ),
                                                 content: Column(
                                                   mainAxisSize:
@@ -348,20 +351,26 @@ class _AdminPanelState extends State<AdminPanel> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      "Nome: ${employee.name}",
+                                                      l10n.nameFormat(
+                                                        employee.name,
+                                                      ),
                                                     ),
                                                     Text(
-                                                      "Telefone: ${employee.phone}",
+                                                      l10n.phoneFormat(
+                                                        employee.phone,
+                                                      ),
                                                     ),
                                                     Text(
-                                                      "Horas trabalhadas esse mês: ${horasTrabalhadas.toStringAsFixed(2)}",
+                                                      l10n.hoursWorkedLastMonth(
+                                                        calcularHorasTrabalhadasMesAnterior(
+                                                          pontos,
+                                                        ).toStringAsFixed(2),
+                                                      ),
                                                     ),
                                                     SizedBox(height: 1),
                                                     Row(
                                                       children: [
-                                                        Text(
-                                                          "Defina o horário de entrada: ",
-                                                        ),
+                                                        Text(l10n.setEntryTime),
                                                         TextButton(
                                                           onPressed: () {
                                                             showDefineScheduleDialog(
@@ -388,10 +397,13 @@ class _AdminPanelState extends State<AdminPanel> {
                                                     ),
                                                     SizedBox(height: 20),
                                                     Text(
-                                                      "Código de verificação: ${employee.verificationCode ?? 'Não definido'}",
+                                                      l10n.verificationCode(
+                                                        employee.verificationCode ??
+                                                            l10n.verificationCodeNotDefined,
+                                                      ),
                                                     ),
                                                     Text(
-                                                      "Envie o código para o funcionário para que ele possa redefinir a senha.",
+                                                      l10n.sendCodeInstruction,
                                                       style: TextStyle(
                                                         fontStyle:
                                                             FontStyle.italic,
@@ -418,14 +430,14 @@ class _AdminPanelState extends State<AdminPanel> {
                                                             FontWeight.bold,
                                                       ),
                                                     ),
-                                                    child: Text("Fechar"),
+                                                    child: Text(l10n.close),
                                                   ),
                                                 ],
                                               ),
                                         );
                                       },
                                       child: Text(
-                                        "Detalhes",
+                                        l10n.details,
                                         style: TextStyle(
                                           color: Colors.blue[700],
                                           fontWeight: FontWeight.bold,
@@ -461,7 +473,7 @@ class _AdminPanelState extends State<AdminPanel> {
               },
             );
           },
-          tooltip: "Adicionar Funcionário",
+          tooltip: l10n.addEmployeeTooltip,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
           ),

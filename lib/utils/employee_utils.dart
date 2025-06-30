@@ -1,83 +1,158 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart'
-    as gmaps; // Prefixo para google_maps_flutter
-import '../employee.dart';
+import 'package:ponto/employee.dart';
 
 /// Exibe a localização do funcionário em um mapa.
 void showLocationDialog(BuildContext context, List<dynamic> pontos) {
-  if (pontos.isNotEmpty &&
-      pontos.last.location.toString().trim().isNotEmpty &&
-      pontos.last.location.toString().contains(',')) {
-    try {
-      final location = pontos.last.location.toString();
-      final latLng =
-          location
-              .split(',')
-              .map((e) => double.tryParse(e.trim()) ?? 0.0)
-              .toList();
+  final l10n = AppLocalizations.of(context)!;
 
-      if (latLng.length == 2 && latLng[0] != 0.0 && latLng[1] != 0.0) {
-        // Exibe o Google Map com a localização do funcionário
-        showDialog(
-          context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text("Localização do Funcionário"),
-                content: SizedBox(
-                  width: double.maxFinite,
-                  height: 300,
-                  child: gmaps.GoogleMap(
-                    initialCameraPosition: gmaps.CameraPosition(
-                      target: gmaps.LatLng(latLng[0], latLng[1]),
-                      zoom: 15,
-                    ),
-                    markers: {
-                      gmaps.Marker(
-                        markerId: const gmaps.MarkerId("employee_location"),
-                        position: gmaps.LatLng(latLng[0], latLng[1]),
-                        infoWindow: const gmaps.InfoWindow(
-                          title: "Localização do Funcionário",
-                        ),
+  // Verifica se há pontos com localização
+  if (pontos.isEmpty) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.locationNotAvailable)));
+    return;
+  }
+
+  // Busca pelo último ponto com localização válida
+  String? location;
+  for (int i = pontos.length - 1; i >= 0; i--) {
+    final currentLocation = pontos[i].location?.toString() ?? "";
+    if (currentLocation.trim().isNotEmpty &&
+        currentLocation != "null" &&
+        currentLocation.contains(',')) {
+      location = currentLocation;
+      break;
+    }
+  }
+
+  if (location == null) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.locationNotAvailable)));
+    return;
+  }
+
+  try {
+    // Extrai as coordenadas - usa 0.0 como valor padrão em caso de erro no parse
+    final latLng =
+        location
+            .split(',')
+            .map((e) => double.tryParse(e.trim()) ?? 0.0)
+            .toList();
+
+    // Verifica se há duas coordenadas válidas
+    if (latLng.length == 2 && latLng[0] != 0.0 && latLng[1] != 0.0) {
+      showDialog(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: Text(l10n.employeeLocation),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: double.maxFinite,
+                    height: 250,
+                    child: FlutterMap(
+                      options: MapOptions(
+                        initialCenter: LatLng(latLng[0], latLng[1]),
+                        initialZoom: 15.0,
                       ),
-                    },
+                      children: [
+                        TileLayer(
+                          urlTemplate:
+                              "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                          subdomains: const ['a', 'b', 'c'],
+                        ),
+                        MarkerLayer(
+                          markers: [
+                            Marker(
+                              width: 80.0,
+                              height: 80.0,
+                              point: LatLng(latLng[0], latLng[1]),
+                              child: const Icon(
+                                Icons.location_on,
+                                color: Colors.red,
+                                size: 40,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Fechar"),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '${latLng[0].toStringAsFixed(6)}, ${latLng[1].toStringAsFixed(6)}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ],
               ),
-        );
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Localização inválida")));
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erro ao processar localização: $e")),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(l10n.close, style: TextStyle(color: Colors.red)),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final url = Uri.parse(
+                      "https://www.google.com/maps/search/?api=1&query=${latLng[0]},${latLng[1]}",
+                    );
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(
+                        url,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    } else {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(l10n.cannotOpenMap)),
+                        );
+                      }
+                    }
+                  },
+                  child: Text(l10n.openInGoogleMaps),
+                ),
+              ],
+            ),
       );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.invalidLocation)));
     }
-  } else {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Localização não disponível")));
+  } catch (e) {
+    // Logger pode ser implementado aqui em vez de print
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.errorProcessingLocation(e.toString()))),
+    );
   }
 }
 
 /// Exibe o diálogo para definir o horário e os dias da semana.
 void showDefineScheduleDialog(BuildContext context, Employee employee) {
+  final l10n = AppLocalizations.of(context)!;
+
   final List<String> daysOfWeek = [
-    'Segunda',
-    'Terça',
-    'Quarta',
-    'Quinta',
-    'Sexta',
-    'Sábado',
-    'Domingo',
+    l10n.monday,
+    l10n.tuesday,
+    l10n.wednesday,
+    l10n.thursday,
+    l10n.friday,
+    l10n.saturday,
+    l10n.sunday,
   ];
   final selectedDays = employee.notificationDays ?? [];
 
@@ -87,16 +162,16 @@ void showDefineScheduleDialog(BuildContext context, Employee employee) {
         (context) => StatefulBuilder(
           builder:
               (context, setState) => AlertDialog(
-                title: const Text("Definir Horário e Dias da Semana"),
+                title: Text(l10n.defineScheduleAndDays),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text("Defina o horário de entrada:"),
+                    Text(l10n.defineEntrySchedule),
                     const SizedBox(height: 4),
                     TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Horário de Entrada (HH:mm)',
-                        hintText: 'Exemplo: 08:00',
+                      decoration: InputDecoration(
+                        labelText: l10n.entryTimeHint,
+                        hintText: l10n.entryTimeExample,
                       ),
                       keyboardType: TextInputType.datetime,
                       onChanged: (value) {
@@ -104,7 +179,7 @@ void showDefineScheduleDialog(BuildContext context, Employee employee) {
                       },
                     ),
                     const SizedBox(height: 16),
-                    const Text("Selecione os dias da semana:"),
+                    Text(l10n.selectDaysOfWeek),
                     Wrap(
                       spacing: 8,
                       children:
@@ -130,7 +205,7 @@ void showDefineScheduleDialog(BuildContext context, Employee employee) {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text("Cancelar"),
+                    child: Text(l10n.cancel),
                   ),
                   ElevatedButton(
                     onPressed: () async {
@@ -143,12 +218,10 @@ void showDefineScheduleDialog(BuildContext context, Employee employee) {
                           });
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Horário e dias atualizados!"),
-                        ),
+                        SnackBar(content: Text(l10n.scheduleUpdated)),
                       );
                     },
-                    child: const Text("Salvar"),
+                    child: Text(l10n.save),
                   ),
                 ],
               ),
@@ -162,11 +235,13 @@ void showCadastroFuncionarioDialog({
   required String adminId,
   required VoidCallback onReload,
 }) {
+  final l10n = AppLocalizations.of(context)!;
+
   showDialog(
     context: context,
     builder:
         (context) => AlertDialog(
-          title: const Text("Adicionar Funcionário"),
+          title: Text(l10n.addEmployeeTitle),
           content: SizedBox(
             width: 300,
             height: 400,
@@ -182,9 +257,7 @@ void showCadastroFuncionarioDialog({
                 }
                 final docs = snapshot.data!.docs;
                 if (docs.isEmpty) {
-                  return const Center(
-                    child: Text("Nenhum funcionário disponível"),
-                  );
+                  return Center(child: Text(l10n.noEmployeesAvailable));
                 }
                 return ListView.builder(
                   itemCount: docs.length,
@@ -194,7 +267,7 @@ void showCadastroFuncionarioDialog({
                       title: Text(data['name'] ?? ''),
                       subtitle: Text(data['phone'] ?? ''),
                       trailing: ElevatedButton(
-                        child: const Text("Adicionar"),
+                        child: Text(l10n.add),
                         onPressed: () async {
                           await FirebaseFirestore.instance
                               .collection('employees')
@@ -223,7 +296,7 @@ void showCadastroFuncionarioDialog({
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              child: const Text("Fechar"),
+              child: Text(l10n.close),
             ),
           ],
         ),

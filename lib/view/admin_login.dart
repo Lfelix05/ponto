@@ -9,6 +9,7 @@ import 'admin_panelWeb.dart';
 import 'admin_register.dart';
 import '../utils/validator.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,14 +22,21 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _loginController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   Future<void> _login() async {
+    final l10n = AppLocalizations.of(context)!;
+
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
       try {
         // Autentica com Firebase Auth
         final userCredential = await FirebaseAuth.instance
             .signInWithEmailAndPassword(
-              email: _loginController.text,
+              email: _loginController.text.trim(),
               password: _passwordController.text,
             );
 
@@ -52,7 +60,9 @@ class _LoginScreenState extends State<LoginScreen> {
             // Redireciona diretamente para a tela de painel do administrador na Web
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => AdminPanelWeb(admin: admin)),
+              MaterialPageRoute(
+                builder: (context) => AdminPanelWeb(admin: admin),
+              ),
             );
           } else {
             // Para dispositivos móveis, redireciona para o painel do administrador
@@ -62,23 +72,59 @@ class _LoginScreenState extends State<LoginScreen> {
             );
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Admin não encontrado no banco de dados.')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.loginError)));
         }
       } on FirebaseAuthException catch (e) {
+        String errorMessage;
+
+        // Traduzir mensagens de erro comuns do Firebase Auth
+        switch (e.code) {
+          case 'user-not-found':
+            errorMessage = l10n.userNotFound;
+            break;
+          case 'wrong-password':
+            errorMessage = l10n.incorrectPassword;
+            break;
+          case 'invalid-email':
+            errorMessage = l10n.invalidEmail;
+            break;
+          case 'user-disabled':
+            errorMessage = l10n.userDisabled;
+            break;
+          case 'too-many-requests':
+            errorMessage = l10n.tooManyRequests;
+            break;
+          default:
+            errorMessage = l10n.authError(e.message ?? e.code);
+        }
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(errorMessage)));
+      } catch (e) {
+        // Captura outros erros não relacionados à autenticação
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro de autenticação: ${e.message}')),
+          SnackBar(content: Text(l10n.errorMessage(e.toString()))),
         );
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 195, 230, 255),
-      appBar: AppBar(title: const Text('Login Administrador')),
+      appBar: AppBar(title: Text(l10n.adminloginTitle)),
       body: Center(
         child: SingleChildScrollView(
           child: Container(
@@ -111,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 16),
                       // Título
                       Text(
-                        'Bem-vindo!',
+                        l10n.loginTitle,
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -121,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 8),
                       // Subtítulo
                       Text(
-                        'Acesse sua conta de administrador',
+                        l10n.logintext,
                         style: TextStyle(fontSize: 15, color: Colors.grey[700]),
                         textAlign: TextAlign.center,
                       ),
@@ -129,28 +175,39 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Campo de email
                       TextFormField(
                         controller: _loginController,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          prefixIcon: Icon(
+                        decoration: InputDecoration(
+                          labelText: l10n.email,
+                          prefixIcon: const Icon(
                             Icons.email,
                             color: Color(0xFF23608D),
                           ),
                         ),
-                        validator: isAvalidEmail.validate,
+                        // Usando o método com internacionalização
+                        validator:
+                            (value) => isAvalidEmail.validateWithContext(
+                              value,
+                              context,
+                            ),
+                        keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: 16),
                       // Campo de senha
                       TextFormField(
                         controller: _passwordController,
-                        decoration: const InputDecoration(
-                          labelText: 'Senha',
-                          prefixIcon: Icon(
+                        decoration: InputDecoration(
+                          labelText: l10n.password,
+                          prefixIcon: const Icon(
                             Icons.lock,
                             color: Color(0xFF23608D),
                           ),
                         ),
                         obscureText: true,
-                        validator: isAvalidPassword.validate,
+                        // Usando o método com internacionalização
+                        validator:
+                            (value) => isAvalidPassword.validateWithContext(
+                              value,
+                              context,
+                            ),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -160,13 +217,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => AdminForgotPassword(),
+                                  builder:
+                                      (context) => const AdminForgotPassword(),
                                 ),
                               );
                             },
-                            child: const Text(
-                              'Esqueci minha senha',
-                              style: TextStyle(
+                            child: Text(
+                              l10n.forgotPassword,
+                              style: const TextStyle(
                                 color: Colors.blue,
                                 fontSize: 14,
                               ),
@@ -177,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 12),
                       // Botão de login
                       ElevatedButton(
-                        onPressed: _login,
+                        onPressed: _isLoading ? null : _login,
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 48),
                           backgroundColor: Colors.blue[800],
@@ -187,23 +245,38 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           elevation: 4,
                         ),
-                        child: const Text(
-                          'Entrar',
-                          style: TextStyle(fontSize: 18),
-                        ),
+                        child:
+                            _isLoading
+                                ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 3,
+                                  ),
+                                )
+                                : Text(
+                                  l10n.login,
+                                  style: const TextStyle(fontSize: 18),
+                                ),
                       ),
                       const SizedBox(height: 20),
                       // Botão para cadastro
                       TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => AdminRegisterScreen(),
-                            ),
-                          );
-                        },
-                        child: const Text('Não tem conta? Cadastre-se'),
+                        onPressed:
+                            _isLoading
+                                ? null
+                                : () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) =>
+                                              const AdminRegisterScreen(),
+                                    ),
+                                  );
+                                },
+                        child: Text(l10n.noAccount),
                       ),
                     ],
                   ),

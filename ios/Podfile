@@ -1,0 +1,19 @@
+# Podfile - Versão Definitiva (Compatibilidade + Workspace)
+
+# Especifica o workspace para o CocoaPods saber onde integrar os pods.
+workspace 'Runner.xcworkspace'
+
+platform :ios, '13.0'
+
+# Impede que o CocoaPods tente fazer code signing
+install! 'cocoapods', :disable_input_output_paths => true
+
+# Para usar frameworks Swift nos plugins
+use_frameworks!
+use_modular_headers!
+
+# Carrega os scripts auxiliares do Flutter
+load File.join(ENV['FLUTTER_ROOT'], 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
+
+# Função principal que configura todos os pods dos plugins
+flutter_ios_podfile_setup

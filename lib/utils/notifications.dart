@@ -3,21 +3,28 @@ import 'package:intl/intl.dart';
 import '../database.dart';
 import '../employee.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
-Future<void> showNotification(String title, String body) async {
-  const AndroidNotificationDetails androidPlatformChannelSpecifics =
+Future<void> showNotification(
+  BuildContext context,
+  String title,
+  String body,
+) async {
+  final l10n = AppLocalizations.of(context)!;
+  final AndroidNotificationDetails androidPlatformChannelSpecifics =
       AndroidNotificationDetails(
         'ponto_channel',
-        'Ponto Notificações',
-        channelDescription: 'Notificações do app de ponto',
+        l10n.appTitle,
+        channelDescription: l10n.notificationsChannelDescription,
         importance: Importance.max,
         priority: Priority.high,
         ticker: 'ticker',
       );
-  const NotificationDetails platformChannelSpecifics = NotificationDetails(
+  final NotificationDetails platformChannelSpecifics = NotificationDetails(
     android: androidPlatformChannelSpecifics,
   );
   await flutterLocalNotificationsPlugin.show(
@@ -31,10 +38,28 @@ Future<void> showNotification(String title, String body) async {
 
 // Função para agendar ou disparar notificação de ausência/check-in
 Future<void> scheduleCheckInReminder({
+  BuildContext? context,
   required String employeeId,
   required String? checkInTime,
 }) async {
-  print('scheduleCheckInReminder chamado para $employeeId em $checkInTime');
+  // Usaremos strings hardcoded como fallback quando o contexto não estiver disponível
+  String absentTitle = 'Você está ausente!';
+  String absentMessage = 'Você não fez o check-in no horário programado.';
+  String appTitle = 'Ponto Eletrônico';
+  String channelDescription = 'Notificações do app de ponto';
+  String localeCode = 'pt_BR';
+
+  // Se o contexto estiver disponível, use as traduções
+  if (context != null) {
+    final l10n = AppLocalizations.of(context)!;
+    absentTitle = l10n.youAreAbsent;
+    absentMessage = l10n.noCheckInScheduledTime;
+    appTitle = l10n.appTitle;
+    channelDescription = l10n.notificationsChannelDescription;
+    localeCode = Localizations.localeOf(context).languageCode;
+  }
+
+  // Parâmetros de horário
   final parts = (checkInTime ?? "08:00").split(':');
   final hour = int.tryParse(parts[0]) ?? 8;
   final minute = int.tryParse(parts[1]) ?? 0;
@@ -42,45 +67,48 @@ Future<void> scheduleCheckInReminder({
   final now = DateTime.now();
   final scheduled = DateTime(now.year, now.month, now.day, hour, minute);
 
-  final doc = await FirebaseFirestore.instance
-      .collection('employees')
-      .doc(employeeId)
-      .get();
+  final doc =
+      await FirebaseFirestore.instance
+          .collection('employees')
+          .doc(employeeId)
+          .get();
   final employee = Employee.fromJson(doc.data()!);
 
   // Verificar se o dia atual está nos dias selecionados
   final daysOfWeek = employee.notificationDays ?? [];
-  final today = DateFormat('EEEE', 'pt_BR').format(now); // Nome do dia em português
+  final today = DateFormat(
+    'EEEE',
+    localeCode == 'en' ? 'en_US' : 'pt_BR',
+  ).format(now);
   if (!daysOfWeek.contains(today)) {
-    print('Hoje ($today) não está nos dias selecionados para notificações.');
+    // Dia atual não está nos dias selecionados para notificações
     return;
   }
 
   final pontos = await Database.getPontosByEmployeeId(employeeId);
-  print('Pontos encontrados: ${pontos.length}');
   final fezCheckInHoje = pontos.any(
     (p) =>
         p.checkIn.day == now.day &&
         p.checkIn.month == now.month &&
         p.checkIn.year == now.year,
   );
-  print('Fez check-in hoje? $fezCheckInHoje');
+
+  // Se já fez check-in hoje, não precisa notificar
   if (fezCheckInHoje) {
-    print('Já fez check-in hoje, não notifica.');
     return;
   }
 
   if (now.isAfter(scheduled)) {
-    print('Horário já passou, disparando notificação de ausência!');
+    // Horário já passou, dispara notificação de ausência
     await flutterLocalNotificationsPlugin.show(
       100,
-      'Você está ausente!',
-      'Você não fez o check-in no horário programado.',
-      const NotificationDetails(
+      absentTitle,
+      absentMessage,
+      NotificationDetails(
         android: AndroidNotificationDetails(
           'ponto_channel',
-          'Ponto Notificações',
-          channelDescription: 'Notificações do app de ponto',
+          appTitle,
+          channelDescription: channelDescription,
           importance: Importance.max,
           priority: Priority.high,
         ),
@@ -90,5 +118,5 @@ Future<void> scheduleCheckInReminder({
     return;
   }
 
-  print('Horário ainda não passou, não notifica.');
+  // Horário ainda não passou, não precisa notificar
 }

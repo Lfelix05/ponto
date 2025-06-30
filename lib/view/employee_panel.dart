@@ -9,6 +9,7 @@ import '../utils/Geo-Check.dart';
 import '../utils/hours.dart';
 import 'home.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EmployeePanel extends StatefulWidget {
   final Employee employee;
@@ -84,7 +85,7 @@ class _EmployeePanelState extends State<EmployeePanel> {
   // Método para realizar o check-in
   void checkIn() async {
     final now = DateTime.now();
-    final location = await getCurrentLocation();
+    final location = await getCurrentLocation(context);
 
     // Salva no Firestore
     await FirebaseFirestore.instance
@@ -109,21 +110,23 @@ class _EmployeePanelState extends State<EmployeePanel> {
       _hasCheckedIn = true;
     });
     // Notificação local
+    final l10n = AppLocalizations.of(context)!;
     await showNotification(
-      'Check-in realizado',
-      'Seu ponto foi registrado com sucesso!',
+      context,
+      l10n.checkInCompleted,
+      l10n.yourCheckInRegisteredSuccessfully,
     );
 
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text('Check-in realizado com sucesso!')));
+    ).showSnackBar(SnackBar(content: Text(l10n.checkInSuccessful)));
     await flutterLocalNotificationsPlugin.cancel(100);
   }
 
   // Método para realizar o check-out
   void checkOut() async {
     final now = DateTime.now();
-    final location = await getCurrentLocation();
+    final location = await getCurrentLocation(context);
 
     if (_currentPonto != null) {
       // Busca o último ponto aberto (sem checkOut)
@@ -151,36 +154,39 @@ class _EmployeePanelState extends State<EmployeePanel> {
         _hasCheckedIn = false;
       });
 
+      final l10n = AppLocalizations.of(context)!;
       await showNotification(
-        'Check-out realizado',
-        'Saída registrada com sucesso!',
+        context,
+        l10n.checkOutCompleted,
+        l10n.exitRegisteredSuccessfully,
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Check-out realizado com sucesso!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.checkOutSuccessful)));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
     final statusColor = _hasCheckedIn ? Colors.green : Colors.red;
-    final statusText = _hasCheckedIn ? 'Presente' : 'Ausente';
+    final statusText = _hasCheckedIn ? l10n.present : l10n.absent;
     final statusIcon = _hasCheckedIn ? Icons.check_circle : Icons.cancel;
     return WillPopScope(
       onWillPop: () async {
         // Bloqueia o botão "voltar" e exibe uma mensagem
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Use o botão de logout para sair.")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.useLogoutButton)));
         return false; // Retorna false para impedir que o usuário saia da tela
       },
       child: Scaffold(
         backgroundColor: const Color.fromARGB(255, 195, 230, 255),
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: Text('Painel do Funcionário'),
+          title: Text(l10n.employeePanel),
           actions: [
             IconButton(
               icon: Icon(Icons.person),
@@ -189,15 +195,15 @@ class _EmployeePanelState extends State<EmployeePanel> {
                   context: context,
                   builder:
                       (context) => AlertDialog(
-                        title: Text("Informações do Funcionário"),
+                        title: Text(l10n.employeeDetails),
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Nome: ${widget.employee.name}"),
-                            Text("Telefone: ${widget.employee.phone}"),
+                            Text(l10n.nameFormat(widget.employee.name)),
+                            Text(l10n.phoneFormat(widget.employee.phone)),
                             SizedBox(height: 20),
-                            Text("ID: ${widget.employee.id}"),
+                            Text(l10n.idFormat(widget.employee.id)),
                           ],
                         ),
                         actions: [
@@ -213,7 +219,7 @@ class _EmployeePanelState extends State<EmployeePanel> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            child: Text("Fechar"),
+                            child: Text(l10n.close),
                           ),
                         ],
                       ),
@@ -255,7 +261,7 @@ class _EmployeePanelState extends State<EmployeePanel> {
                       ),
                       SizedBox(height: 16),
                       Text(
-                        "Status do Ponto",
+                        l10n.checkInStatus,
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -294,11 +300,11 @@ class _EmployeePanelState extends State<EmployeePanel> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                "Entrada programada:",
+                                l10n.scheduledEntry,
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               Text(
-                                _checkInTime ?? 'N/A',
+                                _checkInTime ?? l10n.notAvailable,
                                 style: TextStyle(fontSize: 16),
                               ),
                               SizedBox(height: 4),
@@ -328,7 +334,7 @@ class _EmployeePanelState extends State<EmployeePanel> {
                               onPressed: _hasCheckedIn ? null : checkIn,
                               icon: Icon(Icons.login, size: 24),
                               label: Text(
-                                "Check-in",
+                                l10n.checkIn,
                                 style: TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
@@ -355,7 +361,7 @@ class _EmployeePanelState extends State<EmployeePanel> {
                               onPressed: _hasCheckedIn ? checkOut : null,
                               icon: Icon(Icons.logout, size: 24),
                               label: Text(
-                                "Check-out",
+                                l10n.checkOut,
                                 style: TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
@@ -368,8 +374,16 @@ class _EmployeePanelState extends State<EmployeePanel> {
                       SizedBox(height: 15),
                       Text(
                         _hasCheckedIn
-                            ? "Check-in realizado às: ${_currentPonto?.checkIn != null ? dateFormat.format(_currentPonto!.checkIn) : 'N/A'}"
-                            : "Check-out realizado às: ${_currentPonto?.checkOut != null ? dateFormat.format(_currentPonto!.checkOut!) : 'N/A'}",
+                            ? l10n.checkInDoneAt(
+                              _currentPonto?.checkIn != null
+                                  ? dateFormat.format(_currentPonto!.checkIn)
+                                  : l10n.notAvailable,
+                            )
+                            : l10n.checkOutDoneAt(
+                              _currentPonto?.checkOut != null
+                                  ? dateFormat.format(_currentPonto!.checkOut!)
+                                  : l10n.notAvailable,
+                            ),
                         style: TextStyle(fontSize: 14),
                       ),
                       SizedBox(height: 32),
@@ -378,7 +392,7 @@ class _EmployeePanelState extends State<EmployeePanel> {
                           widget.employee.id,
                         ),
                         builder: (context, snapshot) {
-                          if (!snapshot.hasData) return Text("Carregando...");
+                          if (!snapshot.hasData) return Text(l10n.loading);
                           final pontos = snapshot.data!;
                           final horasHoje = horasTrabalhadasPorDia(
                             pontos,
@@ -403,7 +417,7 @@ class _EmployeePanelState extends State<EmployeePanel> {
                                   child: Column(
                                     children: [
                                       Text(
-                                        "Horas trabalhadas hoje",
+                                        l10n.hoursWorkedToday,
                                         style: TextStyle(
                                           fontWeight: FontWeight.w500,
                                           fontSize: 14,
@@ -415,7 +429,7 @@ class _EmployeePanelState extends State<EmployeePanel> {
                                       ),
                                       SizedBox(height: 10),
                                       Text(
-                                        "Horas trabalhadas no mês",
+                                        l10n.hoursWorkedThisMonth,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                         ),

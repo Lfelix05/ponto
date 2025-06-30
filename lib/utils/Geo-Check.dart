@@ -1,13 +1,16 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:geolocator/geolocator.dart';
 
-Future<String> getCurrentLocation() async {
+Future<String> getCurrentLocation(BuildContext context) async {
   bool serviceEnabled;
   LocationPermission permission;
+  final l10n = AppLocalizations.of(context)!;
 
   // Verifica se o serviço de localização está habilitado
   serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
-    return "Serviço de localização desativado";
+    return l10n.locationServiceDisabled;
   }
 
   // Verifica as permissões de localização
@@ -15,12 +18,12 @@ Future<String> getCurrentLocation() async {
   if (permission == LocationPermission.denied) {
     permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.denied) {
-      return "Permissão de localização negada";
+      return l10n.locationPermissionDenied;
     }
   }
 
   if (permission == LocationPermission.deniedForever) {
-    return "Permissão de localização permanentemente negada";
+    return l10n.locationPermissionPermanentlyDenied;
   }
 
   // Obtém a localização atual

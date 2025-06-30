@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../admin.dart';
 import 'admin_login.dart';
 import '../utils/validator.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AdminRegisterScreen extends StatefulWidget {
   const AdminRegisterScreen({super.key});
@@ -22,9 +23,9 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
       if (_passwordController.text != _confirmPasswordController.text) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('As senhas não coincidem')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.passwordfail)),
+        );
         return;
       }
 
@@ -56,7 +57,7 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Administrador cadastrado com sucesso!')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.registersucces)),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -70,7 +71,9 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 195, 230, 255),
-      appBar: AppBar(title: const Text('Cadastro de Administrador')),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.adminregisterTitle),
+      ),
       body: Center(
         child: SingleChildScrollView(
           child: Container(
@@ -112,7 +115,7 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
                       const SizedBox(height: 8),
                       // Subtítulo
                       Text(
-                        'Preencha os dados para se cadastrar',
+                        AppLocalizations.of(context)!.registerText,
                         style: TextStyle(fontSize: 15, color: Colors.grey[700]),
                         textAlign: TextAlign.center,
                       ),
@@ -120,8 +123,8 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
                       // Campo de nome
                       TextFormField(
                         controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Nome',
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.fullName,
                           prefixIcon: Icon(
                             Icons.person,
                             color: Color(0xFF23608D),
@@ -152,8 +155,8 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
                       // Campo de senha
                       TextFormField(
                         controller: _passwordController,
-                        decoration: const InputDecoration(
-                          labelText: 'Senha',
+                        decoration: InputDecoration(
+                          labelText: AppLocalizations.of(context)!.password,
                           prefixIcon: Icon(
                             Icons.lock,
                             color: Color(0xFF23608D),
@@ -166,17 +169,19 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
                       // Campo de confirmação de senha
                       TextFormField(
                         controller: _confirmPasswordController,
-                        decoration: const InputDecoration(
-                          labelText: 'Confirmar Senha',
+                        decoration: InputDecoration(
+                          labelText:
+                              AppLocalizations.of(context)!.confirmPassword,
                           prefixIcon: Icon(
                             Icons.lock,
                             color: Color(0xFF23608D),
                           ),
                         ),
                         validator:
-                            (value) => confirmPassword.validate(
-                              value ?? '',
+                            (value) => confirmPassword.validateWithContext(
                               _passwordController.text,
+                              value,
+                              context,
                             ),
                         obscureText: true,
                       ),
@@ -193,8 +198,8 @@ class _AdminRegisterScreenState extends State<AdminRegisterScreen> {
                           ),
                           elevation: 4,
                         ),
-                        child: const Text(
-                          'Cadastrar',
+                        child: Text(
+                          AppLocalizations.of(context)!.register,
                           style: TextStyle(fontSize: 18),
                         ),
                       ),
