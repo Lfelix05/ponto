@@ -19,6 +19,7 @@ import 'package:workmanager/workmanager.dart';
 import 'utils/notifications.dart';
 import 'utils/validator.dart';
 import 'package:flutter/foundation.dart'; // Para verificar se está na Web
+import 'package:flutter/services.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -104,12 +105,17 @@ void main() async {
     ),
   );
 
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => LocalizationProvider(),
-      child: const MyApp(),
-    ),
-  );
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+    ]).then((_) {
+      runApp(
+        ChangeNotifierProvider(
+          create: (_) => LocalizationProvider(),
+          child: const MyApp(),
+        ),
+      );
+    });
 }
 
 class MyApp extends StatelessWidget {
